@@ -1,0 +1,46 @@
+@page "/Modules/04_Habitos"
+@model SmartNutriTracker.Web.Modules.Habitos.IndexModel
+@{
+    Layout = "/Pages/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Módulo 04: Registro de Hábitos (Equipo 4)";
+}
+
+<div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-6">
+        <div>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-teal-100 text-teal-800 mb-2">
+                🏃 Equipo 4 &bull; Rol: Estudiante &bull; HU-19 a HU-22
+            </span>
+            <h1 class="text-2xl font-extrabold text-slate-900">
+                Módulo Registro de Hábitos en construcción por el Equipo 4
+            </h1>
+            <p class="text-sm text-slate-500 mt-1">
+                Registro de consumo alimenticio real, vasos de agua, horas de sueño, actividad física e historial.
+            </p>
+        </div>
+        <a href="/swagger" target="_blank" class="px-4 py-2.5 rounded-xl bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold transition shrink-0">
+            ⚡ Abrir Swagger UI
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+            <h3 class="font-extrabold text-slate-800 text-sm">📂 Archivos de trabajo del Equipo 4</h3>
+            <p class="text-slate-600">Desarrolla todas tus clases únicamente dentro de:</p>
+            <ul class="list-disc list-inside space-y-1 font-mono text-emerald-700">
+                <li>Modules/04_Habitos/AppDbContext.Habitos.cs</li>
+                <li>Modules/04_Habitos/Models/</li>
+                <li>Modules/04_Habitos/Controllers/</li>
+                <li>Modules/04_Habitos/Index.cshtml</li>
+            </ul>
+        </div>
+        <div class="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 space-y-2">
+            <h3 class="font-extrabold text-emerald-900 text-sm">🎯 Historias de Usuario Asignadas</h3>
+            <ul class="list-disc list-inside space-y-1 text-slate-700">
+                <li><strong>HU-19:</strong> Registro diario de alimentos consumidos por el estudiante.</li>
+                <li><strong>HU-20 / HU-21:</strong> Control de vasos de agua, sueño y actividad física.</li>
+                <li><strong>HU-22:</strong> Historial semanal de cumplimiento de hábitos saludables.</li>
+            </ul>
+        </div>
+    </div>
+</div>

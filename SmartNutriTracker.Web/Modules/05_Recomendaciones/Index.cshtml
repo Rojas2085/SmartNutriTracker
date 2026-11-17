@@ -1,0 +1,46 @@
+@page "/Modules/05_Recomendaciones"
+@model SmartNutriTracker.Web.Modules.Recomendaciones.IndexModel
+@{
+    Layout = "/Pages/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Módulo 05: Recomendaciones Inteligentes (Equipo 5)";
+}
+
+<div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-6">
+        <div>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800 mb-2">
+                💡 Equipo 5 &bull; Rol: Nutricionista &bull; HU-23 a HU-26
+            </span>
+            <h1 class="text-2xl font-extrabold text-slate-900">
+                Módulo Recomendaciones Inteligentes en construcción por el Equipo 5
+            </h1>
+            <p class="text-sm text-slate-500 mt-1">
+                Motor de reglas por IMC, objetivos personalizados y cálculo de requerimientos de macronutrientes.
+            </p>
+        </div>
+        <a href="/swagger" target="_blank" class="px-4 py-2.5 rounded-xl bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold transition shrink-0">
+            ⚡ Abrir Swagger UI
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+            <h3 class="font-extrabold text-slate-800 text-sm">📂 Archivos de trabajo del Equipo 5</h3>
+            <p class="text-slate-600">Desarrolla todas tus clases únicamente dentro de:</p>
+            <ul class="list-disc list-inside space-y-1 font-mono text-emerald-700">
+                <li>Modules/05_Recomendaciones/AppDbContext.Recomendaciones.cs</li>
+                <li>Modules/05_Recomendaciones/Models/</li>
+                <li>Modules/05_Recomendaciones/Controllers/</li>
+                <li>Modules/05_Recomendaciones/Index.cshtml</li>
+            </ul>
+        </div>
+        <div class="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 space-y-2">
+            <h3 class="font-extrabold text-emerald-900 text-sm">🎯 Historias de Usuario Asignadas</h3>
+            <ul class="list-disc list-inside space-y-1 text-slate-700">
+                <li><strong>HU-23:</strong> Motor de reglas nutricionales según rango de IMC y edad.</li>
+                <li><strong>HU-24:</strong> Definición de objetivos calóricos y macronutrientes diarios.</li>
+                <li><strong>HU-26:</strong> Generación de sugerencias saludables para estudiantes.</li>
+            </ul>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,207 @@
+@page "/Dashboard"
+@using System.Security.Claims
+@model SmartNutriTracker.Web.Pages.Dashboard.IndexModel
+@{
+    Layout = "/Pages/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Dashboard General";
+    var rolActual = User.FindFirst(ClaimTypes.Role)?.Value ?? "Estudiante";
+}
+
+<div class="space-y-8">
+
+    <!-- BANNER DE BIENVENIDA -->
+    <section class="rounded-3xl bg-gradient-to-r from-[#059669] via-emerald-600 to-teal-700 text-white p-6 sm:p-8 shadow-lg">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div class="space-y-2">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-xs font-bold uppercase tracking-wider">
+                    <span>@Model.EquipoAsignado</span>
+                    <span>&bull;</span>
+                    <span>Rol: @rolActual</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                    ¡Bienvenido(a), @Model.NombreUsuario!
+                </h1>
+                <p class="text-emerald-50 text-sm max-w-2xl">
+                    Arquitectura Modular aislada para los <strong>6 equipos de desarrollo</strong> del Colegio "Innovare".
+                    Cada grupo trabaja exclusivamente dentro de su carpeta <code class="bg-emerald-900/50 px-2 py-0.5 rounded">Modules/0X_...</code> sin conflictos en <code>Program.cs</code> ni en <code>AppDbContext.cs</code>.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 shrink-0">
+                <a href="/swagger" target="_blank"
+                   class="px-4 py-2.5 rounded-xl bg-white text-emerald-800 font-bold text-xs shadow hover:bg-emerald-50 transition">
+                    ⚡ Abrir Swagger (/swagger)
+                </a>
+                <button type="button" onclick="copiarTokenJwt()"
+                        id="btnCopiarJwt"
+                        class="px-4 py-2.5 rounded-xl bg-emerald-900/50 hover:bg-emerald-900/70 border border-white/25 text-white font-bold text-xs transition">
+                    📋 Copiar mi Token JWT
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- TARJETAS DE LOS 6 MÓDULOS AISLADOS -->
+    <section class="space-y-4">
+        <div>
+            <h2 class="text-xl font-extrabold text-slate-900">
+                Módulos Habilitados para tu Rol (<span class="text-[#059669]">@rolActual</span>)
+            </h2>
+            <p class="text-xs text-slate-500">
+                Haz clic en cualquier tarjeta para ingresar a la vista Razor aislada del equipo correspondiente.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="bg-white rounded-2xl p-6 border-2 border-emerald-500 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-800">
+                            🛡️ Equipo 1 &bull; HU-01 a HU-05
+                        </span>
+                        <h3 class="text-base font-extrabold text-slate-900 mt-3">01. Autenticación y Seguridad</h3>
+                        <p class="text-xs text-slate-600 mt-1">
+                            Registro de usuarios, gestión de los 4 roles, JWT y bitácora de auditoría.
+                        </p>
+                        <p class="mt-3 text-[11px] font-mono text-slate-500">Carpeta: Modules/01_Autenticacion/</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-xs font-bold text-emerald-700">● Operativo</span>
+                        <a href="/Modules/01_Autenticacion" class="text-xs font-bold text-[#059669] hover:underline">Abrir Módulo 01 &rarr;</a>
+                    </div>
+                </div>
+            }
+
+            @if (User.IsInRole("Docente") || User.IsInRole("Admin"))
+            {
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-emerald-500 shadow-sm transition flex flex-col justify-between">
+                    <div>
+                        <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-100 text-blue-800">
+                            📋 Equipo 2 &bull; HU-08 a HU-12
+                        </span>
+                        <h3 class="text-base font-extrabold text-slate-900 mt-3">02. Perfil y Reportes</h3>
+                        <p class="text-xs text-slate-600 mt-1">
+                            Registro de estudiantes, perfil IMC, dashboard docente y reportes semanales.
+                        </p>
+                        <p class="mt-3 text-[11px] font-mono text-slate-500">Carpeta: Modules/02_PerfilReportes/</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-xs font-semibold text-blue-700">Rol: Docente</span>
+                        <a href="/Modules/02_PerfilReportes" class="text-xs font-bold text-[#059669] hover:underline">Abrir Módulo 02 &rarr;</a>
+                    </div>
+                </div>
+            }
+
+            @if (User.IsInRole("Nutricionista") || User.IsInRole("Admin"))
+            {
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-emerald-500 shadow-sm transition flex flex-col justify-between">
+                    <div>
+                        <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-100 text-amber-800">
+                            🍎 Equipo 3 &bull; HU-14 a HU-17
+                        </span>
+                        <h3 class="text-base font-extrabold text-slate-900 mt-3">03. Gestión de Alimentos</h3>
+                        <p class="text-xs text-slate-600 mt-1">
+                            CRUD de alimentos, creación de menús diarios y resumen nutricional.
+                        </p>
+                        <p class="mt-3 text-[11px] font-mono text-slate-500">Carpeta: Modules/03_Alimentos/</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-xs font-semibold text-amber-700">Rol: Nutricionista</span>
+                        <a href="/Modules/03_Alimentos" class="text-xs font-bold text-[#059669] hover:underline">Abrir Módulo 03 &rarr;</a>
+                    </div>
+                </div>
+            }
+
+            @if (User.IsInRole("Estudiante") || User.IsInRole("Admin"))
+            {
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-emerald-500 shadow-sm transition flex flex-col justify-between">
+                    <div>
+                        <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-teal-100 text-teal-800">
+                            🏃 Equipo 4 &bull; HU-19 a HU-22
+                        </span>
+                        <h3 class="text-base font-extrabold text-slate-900 mt-3">04. Registro de Hábitos</h3>
+                        <p class="text-xs text-slate-600 mt-1">
+                            Registro de consumo real, agua, sueño, actividad física e historial.
+                        </p>
+                        <p class="mt-3 text-[11px] font-mono text-slate-500">Carpeta: Modules/04_Habitos/</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-xs font-semibold text-teal-700">Rol: Estudiante</span>
+                        <a href="/Modules/04_Habitos" class="text-xs font-bold text-[#059669] hover:underline">Abrir Módulo 04 &rarr;</a>
+                    </div>
+                </div>
+            }
+
+            @if (User.IsInRole("Nutricionista") || User.IsInRole("Estudiante") || User.IsInRole("Admin"))
+            {
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-emerald-500 shadow-sm transition flex flex-col justify-between">
+                    <div>
+                        <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-100 text-purple-800">
+                            💡 Equipo 5 &bull; HU-23 a HU-26
+                        </span>
+                        <h3 class="text-base font-extrabold text-slate-900 mt-3">05. Recomendaciones</h3>
+                        <p class="text-xs text-slate-600 mt-1">
+                            Motor de reglas por IMC, objetivos personalizados y cálculo de macros.
+                        </p>
+                        <p class="mt-3 text-[11px] font-mono text-slate-500">Carpeta: Modules/05_Recomendaciones/</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-xs font-semibold text-purple-700">Rol: Nutricionista</span>
+                        <a href="/Modules/05_Recomendaciones" class="text-xs font-bold text-[#059669] hover:underline">Abrir Módulo 05 &rarr;</a>
+                    </div>
+                </div>
+            }
+
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-emerald-500 shadow-sm transition flex flex-col justify-between">
+                    <div>
+                        <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-100 text-rose-800">
+                            🔔 Equipo 6 &bull; HU-27 a HU-32
+                        </span>
+                        <h3 class="text-base font-extrabold text-slate-900 mt-3">06. Notificaciones y QA</h3>
+                        <p class="text-xs text-slate-600 mt-1">
+                            Alertas por límites nutricionales, recordatorios internos y logs globales.
+                        </p>
+                        <p class="mt-3 text-[11px] font-mono text-slate-500">Carpeta: Modules/06_Notificaciones/</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-xs font-semibold text-rose-700">Rol: Admin (QA)</span>
+                        <a href="/Modules/06_Notificaciones" class="text-xs font-bold text-[#059669] hover:underline">Abrir Módulo 06 &rarr;</a>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </section>
+
+    <!-- TOKEN JWT ACTIVO -->
+    <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-2">
+        <div class="flex items-center justify-between">
+            <h3 class="text-sm font-extrabold text-slate-900">🔑 Tu Token JWT Bearer (Para el botón Authorize de /swagger)</h3>
+            <span class="text-xs text-slate-400">HS256 firmado por JwtTokenService</span>
+        </div>
+        <input type="text" id="jwtTokenInput" readonly value="@Model.JwtToken"
+               class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 text-emerald-400 font-mono text-xs border border-slate-700 focus:outline-none" />
+    </section>
+
+</div>
+
+@section Scripts {
+    <script>
+        function copiarTokenJwt() {
+            const input = document.getElementById('jwtTokenInput');
+            if (!input || !input.value) return;
+            navigator.clipboard.writeText(input.value).then(() => {
+                const btn = document.getElementById('btnCopiarJwt');
+                if (btn) {
+                    const original = btn.textContent;
+                    btn.textContent = '✅ ¡Token Copiado!';
+                    setTimeout(() => btn.textContent = original, 2000);
+                }
+            });
+        }
+    </script>
+}

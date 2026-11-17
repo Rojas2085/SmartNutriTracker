@@ -1,0 +1,46 @@
+@page "/Modules/02_PerfilReportes"
+@model SmartNutriTracker.Web.Modules.PerfilReportes.IndexModel
+@{
+    Layout = "/Pages/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Módulo 02: Perfil y Reportes (Equipo 2)";
+}
+
+<div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-6">
+        <div>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 mb-2">
+                📋 Equipo 2 &bull; Rol: Docente &bull; HU-08 a HU-12
+            </span>
+            <h1 class="text-2xl font-extrabold text-slate-900">
+                Módulo Perfil y Reportes en construcción por el Equipo 2
+            </h1>
+            <p class="text-sm text-slate-500 mt-1">
+                Registro de estudiantes, perfil antropométrico e IMC, dashboard docente y reportes semanales.
+            </p>
+        </div>
+        <a href="/swagger" target="_blank" class="px-4 py-2.5 rounded-xl bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold transition shrink-0">
+            ⚡ Abrir Swagger UI
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+            <h3 class="font-extrabold text-slate-800 text-sm">📂 Archivos de trabajo del Equipo 2</h3>
+            <p class="text-slate-600">Desarrolla todas tus clases únicamente dentro de:</p>
+            <ul class="list-disc list-inside space-y-1 font-mono text-emerald-700">
+                <li>Modules/02_PerfilReportes/AppDbContext.PerfilReportes.cs</li>
+                <li>Modules/02_PerfilReportes/Models/</li>
+                <li>Modules/02_PerfilReportes/Controllers/</li>
+                <li>Modules/02_PerfilReportes/Index.cshtml</li>
+            </ul>
+        </div>
+        <div class="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 space-y-2">
+            <h3 class="font-extrabold text-emerald-900 text-sm">🎯 Historias de Usuario Asignadas</h3>
+            <ul class="list-disc list-inside space-y-1 text-slate-700">
+                <li><strong>HU-08:</strong> Registro de ficha estudiantil (edad, peso, talla).</li>
+                <li><strong>HU-09 / HU-10:</strong> Cálculo automático y clasificación de IMC.</li>
+                <li><strong>HU-11 / HU-12:</strong> Dashboard docente y reportes semanales por curso.</li>
+            </ul>
+        </div>
+    </div>
+</div>

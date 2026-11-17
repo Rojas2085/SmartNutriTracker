@@ -1,0 +1,26 @@
+## Visual Studio / .NET 8 Ignore
+.vs/
+.vscode/
+.idea/
+bin/
+obj/
+out/
+publish/
+TestResults/
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Base de datos local SQLite de desarrollo
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+## Archivos temporales y sistema operativo
+.DS_Store
+Thumbs.db
+*.log
