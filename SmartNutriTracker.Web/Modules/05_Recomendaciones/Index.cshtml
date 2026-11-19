@@ -1,46 +1,124 @@
 @page "/Modules/05_Recomendaciones"
-@model SmartNutriTracker.Web.Modules.Recomendaciones.IndexModel
+@model SmartNutriTracker.Web.Modules.Recomendaciones.IndexitoModel
 @{
     Layout = "/Pages/Shared/_Layout.cshtml";
     ViewData["Title"] = "Módulo 05: Recomendaciones Inteligentes (Equipo 5)";
 }
 
 <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6">
+    <!-- Cabecera -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-6">
         <div>
             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800 mb-2">
-                💡 Equipo 5 &bull; Rol: Nutricionista &bull; HU-23 a HU-26
+                Equipo 5 &bull; Recomendaciones Inteligentes &bull; HU-23 a HU-26
             </span>
-            <h1 class="text-2xl font-extrabold text-slate-900">
-                Módulo Recomendaciones Inteligentes en construcción por el Equipo 5
-            </h1>
+            <h1 class="text-2xl font-extrabold text-slate-900">Motor de Recomendaciones Nutricionales</h1>
             <p class="text-sm text-slate-500 mt-1">
-                Motor de reglas por IMC, objetivos personalizados y cálculo de requerimientos de macronutrientes.
+                Cálculo automático de IMC, calorías, macronutrientes y menú sugerido (datos simulados).
             </p>
         </div>
         <a href="/swagger" target="_blank" class="px-4 py-2.5 rounded-xl bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold transition shrink-0">
-            ⚡ Abrir Swagger UI
+            Abrir Swagger UI
         </a>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-            <h3 class="font-extrabold text-slate-800 text-sm">📂 Archivos de trabajo del Equipo 5</h3>
-            <p class="text-slate-600">Desarrolla todas tus clases únicamente dentro de:</p>
-            <ul class="list-disc list-inside space-y-1 font-mono text-emerald-700">
-                <li>Modules/05_Recomendaciones/AppDbContext.Recomendaciones.cs</li>
-                <li>Modules/05_Recomendaciones/Models/</li>
-                <li>Modules/05_Recomendaciones/Controllers/</li>
-                <li>Modules/05_Recomendaciones/Index.cshtml</li>
-            </ul>
-        </div>
-        <div class="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 space-y-2">
-            <h3 class="font-extrabold text-emerald-900 text-sm">🎯 Historias de Usuario Asignadas</h3>
-            <ul class="list-disc list-inside space-y-1 text-slate-700">
-                <li><strong>HU-23:</strong> Motor de reglas nutricionales según rango de IMC y edad.</li>
-                <li><strong>HU-24:</strong> Definición de objetivos calóricos y macronutrientes diarios.</li>
-                <li><strong>HU-26:</strong> Generación de sugerencias saludables para estudiantes.</li>
-            </ul>
-        </div>
+    <!-- Selector rápido de estudiantes simulados -->
+    <div class="flex flex-wrap items-center gap-2">
+        <span class="text-xs font-bold text-slate-500 mr-2">Cargar perfil simulado:</span>
+        @foreach (var est in Model.Estudiantes)
+        {
+            <a asp-page="./Index" asp-route-estudianteId="@est.Id"
+               class="px-3 py-1.5 rounded-xl text-xs font-semibold border transition @(Model.EstudianteSeleccionadoId == est.Id ? "bg-purple-600 text-white border-purple-600" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100")">
+                @est.Nombre (@est.Objetivo)
+            </a>
+        }
     </div>
+
+    <!-- Formulario interactivo (HU-24, HU-25, HU-26) -->
+    <form method="post" class="grid grid-cols-1 md:grid-cols-5 gap-4 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+        <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Peso (kg)</label>
+            <input asp-for="PesoKg" type="number" step="0.1" min="25" max="200" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm" required />
+        </div>
+        <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Altura (cm)</label>
+            <input asp-for="AlturaCm" type="number" step="1" min="100" max="220" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm" required />
+        </div>
+        <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Edad</label>
+            <input asp-for="Edad" type="number" min="6" max="25" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm" required />
+        </div>
+        <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Objetivo</label>
+            <select asp-for="Objetivo" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm bg-white">
+                <option value="Bajar">Bajar peso</option>
+                <option value="Mantener">Mantener peso</option>
+                <option value="Ganar">Ganar masa/peso</option>
+            </select>
+        </div>
+        <div class="flex items-end">
+            <button type="submit" class="w-full py-2 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold transition">
+                Calcular Menú
+            </button>
+        </div>
+    </form>
+
+    @if (Model.Resultado is not null)
+    {
+        <!-- Tarjetas de resumen nutricional -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div class="p-4 rounded-2xl border border-slate-200 bg-white">
+                <p class="text-xs text-slate-500 font-semibold">IMC Calculado</p>
+                <p class="text-2xl font-extrabold text-slate-900 mt-1">@Model.Resultado.Imc</p>
+                <span class="inline-block mt-1 px-2 py-0.5 rounded-full text-[11px] font-bold @Model.Resultado.ColorBadge">
+                    @Model.Resultado.CategoriaImc
+                </span>
+            </div>
+            <div class="p-4 rounded-2xl border border-slate-200 bg-white">
+                <p class="text-xs text-slate-500 font-semibold">Calorías / día</p>
+                <p class="text-2xl font-extrabold text-emerald-700 mt-1">@Model.Resultado.CaloriasDiarias</p>
+                <span class="text-[11px] text-slate-400">kcal recomendadas</span>
+            </div>
+            <div class="p-4 rounded-2xl border border-slate-200 bg-white">
+                <p class="text-xs text-slate-500 font-semibold">Proteínas</p>
+                <p class="text-2xl font-extrabold text-slate-900 mt-1">@Model.Resultado.ProteinasG g</p>
+                <span class="text-[11px] text-slate-400">25% diario</span>
+            </div>
+            <div class="p-4 rounded-2xl border border-slate-200 bg-white">
+                <p class="text-xs text-slate-500 font-semibold">Carbohidratos</p>
+                <p class="text-2xl font-extrabold text-slate-900 mt-1">@Model.Resultado.CarbohidratosG g</p>
+                <span class="text-[11px] text-slate-400">50% diario</span>
+            </div>
+            <div class="p-4 rounded-2xl border border-slate-200 bg-white">
+                <p class="text-xs text-slate-500 font-semibold">Grasas</p>
+                <p class="text-2xl font-extrabold text-slate-900 mt-1">@Model.Resultado.GrasasG g</p>
+                <span class="text-[11px] text-slate-400">25% diario</span>
+            </div>
+        </div>
+
+        <!-- Consejo personalizado -->
+        <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-sm">
+            <strong>Recomendación del sistema:</strong> @Model.Resultado.Consejo
+        </div>
+
+        <!-- Menú diario sugerido (HU-23) -->
+        <div>
+            <h2 class="text-lg font-extrabold text-slate-800 mb-3">Menú Diario Sugerido</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                @foreach (var plato in Model.Resultado.MenuSugerido)
+                {
+                    <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 flex justify-between items-start gap-3">
+                        <div>
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-purple-700">@plato.TiempoComida</span>
+                            <h3 class="font-bold text-slate-900 text-sm mt-0.5">@plato.Nombre</h3>
+                            <p class="text-xs text-slate-500 mt-1">@plato.Detalle</p>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-700 shrink-0">
+                            @plato.Calorias kcal
+                        </span>
+                    </div>
+                }
+            </div>
+        </div>
+    }
 </div>

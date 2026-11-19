@@ -1,46 +1,102 @@
 @page "/Modules/06_Notificaciones"
-@model SmartNutriTracker.Web.Modules.Notificaciones.IndexModel
+@model SmartNutriTracker.Web.Modules.Notificaciones.IndexitoModel
 @{
     Layout = "/Pages/Shared/_Layout.cshtml";
-    ViewData["Title"] = "Módulo 06: Notificaciones y QA (Equipo 6)";
+    ViewData["Title"] = "Módulo 06: Notificaciones y Alertas (Equipo 6)";
 }
 
 <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6">
+    <!-- Cabecera -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-6">
         <div>
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 mb-2">
-                🔔 Equipo 6 &bull; Rol: Admin (QA) &bull; HU-27 a HU-32
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 mb-2">
+                Equipo 6 &bull; Notificaciones y Logs &bull; HU-27 a HU-29, HU-32
             </span>
-            <h1 class="text-2xl font-extrabold text-slate-900">
-                Módulo Notificaciones y QA en construcción por el Equipo 6
-            </h1>
+            <h1 class="text-2xl font-extrabold text-slate-900">Centro de Alertas y Recordatorios</h1>
             <p class="text-sm text-slate-500 mt-1">
-                Alertas por límites nutricionales, recordatorios internos de salud y monitoreo de logs globales.
+                Alertas tempranas de hábitos no saludables, recordatorios diarios y trazabilidad en logs.
             </p>
         </div>
         <a href="/swagger" target="_blank" class="px-4 py-2.5 rounded-xl bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold transition shrink-0">
-            ⚡ Abrir Swagger UI
+            Abrir Swagger UI
         </a>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-            <h3 class="font-extrabold text-slate-800 text-sm">📂 Archivos de trabajo del Equipo 6</h3>
-            <p class="text-slate-600">Desarrolla todas tus clases únicamente dentro de:</p>
-            <ul class="list-disc list-inside space-y-1 font-mono text-emerald-700">
-                <li>Modules/06_Notificaciones/AppDbContext.Notificaciones.cs</li>
-                <li>Modules/06_Notificaciones/Models/</li>
-                <li>Modules/06_Notificaciones/Controllers/</li>
-                <li>Modules/06_Notificaciones/Index.cshtml</li>
-            </ul>
+    <!-- Filtros -->
+    <div class="flex flex-wrap gap-2">
+        @foreach (var f in new[] { "Todas", "Alerta", "Recordatorio" })
+        {
+            <a asp-page="./Index" asp-route-filtro="@f"
+               class="px-4 py-1.5 rounded-xl text-xs font-bold border transition @(Model.FiltroActual == f ? "bg-slate-900 text-white border-slate-900" : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100")">
+                @f
+            </a>
+        }
+    </div>
+
+    <!-- Formulario para simular una nueva alerta o recordatorio -->
+    <form method="post" asp-page-handler="Crear" class="grid grid-cols-1 md:grid-cols-12 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+        <div class="md:col-span-2">
+            <select asp-for="NuevoTipo" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white font-semibold">
+                <option value="Recordatorio">Recordatorio</option>
+                <option value="Alerta">Alerta</option>
+            </select>
         </div>
-        <div class="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 space-y-2">
-            <h3 class="font-extrabold text-emerald-900 text-sm">🎯 Historias de Usuario Asignadas</h3>
-            <ul class="list-disc list-inside space-y-1 text-slate-700">
-                <li><strong>HU-27 / HU-28:</strong> Alertas por exceso o déficit nutricional diario.</li>
-                <li><strong>HU-29:</strong> Recordatorios internos de hidratación y comidas.</li>
-                <li><strong>HU-32:</strong> Monitoreo global de calidad y validación de endpoints REST.</li>
-            </ul>
+        <div class="md:col-span-2">
+            <select asp-for="NuevaSeveridad" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white font-semibold">
+                <option value="Info">Info</option>
+                <option value="Media">Media</option>
+                <option value="Alta">Alta</option>
+            </select>
         </div>
+        <div class="md:col-span-3">
+            <input asp-for="NuevoTitulo" placeholder="Título..." class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs" required />
+        </div>
+        <div class="md:col-span-3">
+            <input asp-for="NuevoMensaje" placeholder="Mensaje o detalle..." class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs" required />
+        </div>
+        <div class="md:col-span-2">
+            <button type="submit" class="w-full py-2 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition">
+                + Simular
+            </button>
+        </div>
+    </form>
+
+    <!-- Listado de notificaciones -->
+    <div class="space-y-3">
+        @foreach (var item in Model.Notificaciones)
+        {
+            var badgeColor = item.Severidad switch
+            {
+                "Alta" => "bg-rose-100 text-rose-800",
+                "Media" => "bg-amber-100 text-amber-800",
+                _ => "bg-sky-100 text-sky-800"
+            };
+
+            <div class="p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 @(item.Leida ? "bg-slate-50 border-slate-200 opacity-65" : "bg-white border-slate-300 shadow-sm")">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold @badgeColor">
+                            @item.Tipo &bull; @item.Severidad
+                        </span>
+                        <span class="text-[11px] text-slate-400">Para: @item.Destinatario &bull; @item.Fecha.ToString("dd/MM HH:mm")</span>
+                    </div>
+                    <h3 class="font-bold text-slate-900 text-sm">@item.Titulo</h3>
+                    <p class="text-xs text-slate-600">@item.Mensaje</p>
+                </div>
+
+                @if (!item.Leida)
+                {
+                    <form method="post" asp-page-handler="MarcarLeida" asp-route-id="@item.Id" asp-route-filtro="@Model.FiltroActual">
+                        <button type="submit" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shrink-0">
+                            Marcar leída
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <span class="text-xs font-semibold text-emerald-700 shrink-0">Leída</span>
+                }
+            </div>
+        }
     </div>
 </div>
