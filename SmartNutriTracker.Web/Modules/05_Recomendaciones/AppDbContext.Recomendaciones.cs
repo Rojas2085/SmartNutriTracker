@@ -1,13 +1,14 @@
 using Microsoft.EntityFrameworkCore;
+using SmartNutriTracker.Web.Modules.Recomendaciones.Models;
 
 namespace SmartNutriTracker.Web.Core.Data;
 
 /// <summary>
-/// Extensión parcial de AppDbContext exclusiva para el Equipo 5 (Módulo 05: Recomendaciones Inteligentes).
-/// Agrega aquí tus DbSet&lt;T&gt; (ej. ReglasNutricionales, PlanesRecomendados, ObjetivosMacros) sin modificar Core/Data/AppDbContext.cs.
+/// Extensión parcial de AppDbContext perteneciente exclusivamente al Equipo 5 (Módulo 05: Recomendaciones Inteligentes).
+/// Tablas para HU-23 a HU-26: ReglasNutricionales, RecomendacionesInteligentes.
 /// </summary>
 public partial class AppDbContext
 {
-    // Ejemplo para el Equipo 5:
-    // public DbSet<PlanRecomendado> PlanesRecomendados => Set<PlanRecomendado>();
+    public DbSet<ReglaNutricional> ReglasNutricionales => Set<ReglaNutricional>();
+    public DbSet<RecomendacionInteligente> RecomendacionesInteligentes => Set<RecomendacionInteligente>();
 }

@@ -6,7 +6,12 @@ Plataforma Escolar de Seguimiento Nutricional y Hábitos Saludables construida c
 
 ## 🚀 1. Instrucciones Rápidas de Arranque
 
-Gracias a la configuración por defecto con **SQLite (`SmartNutriTracker.db`)**, cualquier estudiante puede clonar el repositorio y levantar todo el sistema en segundos sin configurar SQL Server local:
+### Opción A (1 Clic con Scripts Automáticos .bat):
+- **Instalar y compilar todo:** Doble clic en `instalar-dependencias.bat` (o en el acceso directo del Escritorio).
+- **Iniciar proyecto y abrir navegador:** Doble clic en `iniciar-proyecto.bat`.
+
+### Opción B (Línea de Comandos):
+Gracias a la configuración por defecto con **SQLite (`SmartNutriTracker.db`)** y soporte para **.NET 10 y .NET 8**, cualquier estudiante puede clonar el repositorio y levantar todo el sistema en segundos sin configurar SQL Server local:
 
 ```bash
 # 1. Ingresar al directorio del proyecto web

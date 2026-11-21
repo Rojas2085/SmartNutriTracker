@@ -1,13 +1,15 @@
 using Microsoft.EntityFrameworkCore;
+using SmartNutriTracker.Web.Modules.Alimentos.Models;
 
 namespace SmartNutriTracker.Web.Core.Data;
 
 /// <summary>
-/// Extensión parcial de AppDbContext exclusiva para el Equipo 3 (Módulo 03: Gestión de Alimentos).
-/// Agrega aquí tus DbSet&lt;T&gt; (ej. Alimentos, MenusDiarios, CategoriasAlimento) sin modificar Core/Data/AppDbContext.cs.
+/// Extensión parcial de AppDbContext perteneciente exclusivamente al Equipo 3 (Módulo 03: Gestión de Alimentos).
+/// Tablas para HU-14 a HU-17: Alimentos, MenusDiarios, DetallesMenuAlimentos.
 /// </summary>
 public partial class AppDbContext
 {
-    // Ejemplo para el Equipo 3:
-    // public DbSet<Alimento> Alimentos => Set<Alimento>();
+    public DbSet<Alimento> Alimentos => Set<Alimento>();
+    public DbSet<MenuDiario> MenusDiarios => Set<MenuDiario>();
+    public DbSet<DetalleMenuAlimento> DetallesMenuAlimentos => Set<DetalleMenuAlimento>();
 }
