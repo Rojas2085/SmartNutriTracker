@@ -19,14 +19,17 @@ public class Alimento
     public string Nombre { get; set; } = string.Empty;
 
     /// <summary>
-    /// Frutas, Verduras, Cereales, Proteínas, Lácteos, Grasas Saludables, Snacks, Bebidas
+    /// Frutas, Verduras, Carnes, Lácteos, Cereales, Saludables, Snacks, Bebidas
     /// </summary>
     [Required]
     [StringLength(60)]
     public string Categoria { get; set; } = "General";
 
+    [StringLength(30)]
+    public string Icono { get; set; } = "🥗";
+
     [StringLength(80)]
-    public string PorcionReferencia { get; set; } = "1 porción";
+    public string PorcionReferencia { get; set; } = "100 g";
 
     [Column(TypeName = "decimal(6,2)")]
     public decimal GramosPorcion { get; set; } = 100m;
@@ -49,6 +52,8 @@ public class Alimento
     [Required]
     [StringLength(20)]
     public string SemaforoNutricional { get; set; } = "Verde";
+
+    public bool EsFavorito { get; set; } = false;
 
     public bool EsAptoQuioscoEscolar { get; set; } = true;
 
@@ -77,11 +82,14 @@ public class MenuDiario
     public DateTime FechaMenu { get; set; } = DateTime.Today;
 
     /// <summary>
-    /// Desayuno, Almuerzo, Refrigerio Escolar, Cena
+    /// Desayuno, Almuerzo, Merienda, Cena
     /// </summary>
     [Required]
     [StringLength(50)]
-    public string TipoComida { get; set; } = "Almuerzo";
+    public string TipoComida { get; set; } = "Desayuno";
+
+    [StringLength(50)]
+    public string EstadoVariante { get; set; } = "Estándar"; // "Estándar", "Usado esta semana", "Nuevo"
 
     [Column(TypeName = "decimal(7,2)")]
     public decimal TotalCalorias { get; set; }
@@ -95,7 +103,18 @@ public class MenuDiario
     [Column(TypeName = "decimal(6,2)")]
     public decimal TotalGrasas { get; set; }
 
+    [StringLength(20)]
+    public string Semaforo { get; set; } = "Verde"; // Verde, Amarillo, Rojo
+
     public bool EsSaludable { get; set; } = true;
+
+    [StringLength(300)]
+    public string DetalleAlimentosResumen { get; set; } = string.Empty;
+
+    public int? EstudianteId { get; set; }
+
+    [ForeignKey(nameof(EstudianteId))]
+    public Usuario? Estudiante { get; set; }
 
     public int? NutricionistaId { get; set; }
 
@@ -120,6 +139,7 @@ public class DetalleMenuAlimento
     [Required]
     public int MenuDiarioId { get; set; }
 
+    [System.Text.Json.Serialization.JsonIgnore]
     [ForeignKey(nameof(MenuDiarioId))]
     public MenuDiario? MenuDiario { get; set; }
 
@@ -129,9 +149,21 @@ public class DetalleMenuAlimento
     [ForeignKey(nameof(AlimentoId))]
     public Alimento? Alimento { get; set; }
 
-    [Column(TypeName = "decimal(5,2)")]
-    public decimal CantidadPorciones { get; set; } = 1.0m;
+    [Column(TypeName = "decimal(6,2)")]
+    public decimal Cantidad { get; set; } = 100m;
+
+    [StringLength(20)]
+    public string Unidad { get; set; } = "g"; // "g" o "unid"
 
     [Column(TypeName = "decimal(6,2)")]
     public decimal SubtotalCalorias { get; set; }
+
+    [Column(TypeName = "decimal(5,2)")]
+    public decimal SubtotalProteinas { get; set; }
+
+    [Column(TypeName = "decimal(5,2)")]
+    public decimal SubtotalCarbohidratos { get; set; }
+
+    [Column(TypeName = "decimal(5,2)")]
+    public decimal SubtotalGrasas { get; set; }
 }

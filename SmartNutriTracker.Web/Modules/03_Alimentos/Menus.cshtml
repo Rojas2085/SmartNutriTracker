@@ -1,0 +1,344 @@
+@page "/Modules/03_Alimentos/Menus"
+@model SmartNutriTracker.Web.Modules.Alimentos.MenusModel
+@{
+    Layout = "/Pages/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Menús Diarios - Equipo 3";
+}
+
+<div class="space-y-6">
+
+    <!-- SUB-BARRA DE NAVEGACIÓN DEL GRUPO 3 -->
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3">
+        <div class="flex items-center gap-2">
+            <a href="/Modules/03_Alimentos"
+               class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-700 border border-slate-200 hover:border-blue-400 hover:text-blue-600 transition">
+                📋 Catálogo de Alimentos
+            </a>
+            <a href="/Modules/03_Alimentos/Menus"
+               class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#2563eb] text-white shadow-sm transition">
+                🍲 Menús Diarios
+            </a>
+            <a href="/Modules/03_Alimentos/CrearMenu"
+               class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition">
+                ✨ + Crear Menú (Wizard)
+            </a>
+        </div>
+        <div class="text-xs text-slate-500 font-medium">
+            Equipo 3 &bull; Planificación Nutricional &bull; HU-16, HU-17
+        </div>
+    </div>
+
+    <!-- ENCABEZADO Y ACCIÓN NUEVO MENÚ -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <div class="text-xs font-medium text-slate-400 mb-1">
+                Dashboard / <span class="text-slate-600 font-semibold">Menús Diarios</span>
+            </div>
+            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Menús Diarios Planificados</h1>
+        </div>
+        <a href="/Modules/03_Alimentos/CrearMenu"
+           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#2563eb] hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition shrink-0">
+            <span>+ Crear Nuevo Menú</span>
+        </a>
+    </div>
+
+    <!-- GRID DE TARJETAS DE MENÚS (MOCKUP IMAGEN 9: 4 COLUMNAS) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        @foreach (var menu in Model.Menus)
+        {
+            var semaforoColor = menu.Semaforo switch {
+                "Verde" => "bg-emerald-500 text-white",
+                "Amarillo" => "bg-amber-400 text-slate-900",
+                "Rojo" => "bg-red-500 text-white",
+                _ => "bg-emerald-500 text-white"
+            };
+
+            var bordeClase = menu.EstadoVariante switch {
+                "Usado esta semana" => "border-2 border-emerald-500",
+                "Nuevo" => "border-2 border-blue-500",
+                _ => "border border-slate-200 hover:border-blue-400"
+            };
+
+            var comidaBadge = menu.TipoComida switch {
+                "Desayuno" => "bg-amber-50 text-amber-800 border-amber-200",
+                "Almuerzo" => "bg-blue-50 text-blue-800 border-blue-200",
+                "Merienda" => "bg-emerald-50 text-emerald-800 border-emerald-200",
+                "Cena" => "bg-purple-50 text-purple-800 border-purple-200",
+                _ => "bg-slate-50 text-slate-700 border-slate-200"
+            };
+
+            <div class="group bg-white rounded-2xl p-5 shadow-sm @bordeClase transition duration-200 flex flex-col justify-between relative min-h-[240px]">
+                
+                <!-- Encabezado de la Tarjeta (Chips superiores) -->
+                <div>
+                    <div class="flex items-center justify-between gap-1 mb-3">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold border @comidaBadge">
+                                @(menu.TipoComida == "Desayuno" ? "🥞 " : menu.TipoComida == "Almuerzo" ? "🍲 " : menu.TipoComida == "Merienda" ? "🥪 " : "🌙 ")@menu.TipoComida
+                            </span>
+                            @if (menu.EstadoVariante == "Usado esta semana")
+                            {
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                                    ✓ Usado esta semana
+                                </span>
+                            }
+                            else if (menu.EstadoVariante == "Nuevo")
+                            {
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">
+                                    ✨ Nuevo
+                                </span>
+                            }
+                        </div>
+                        <span class="text-[11px] text-slate-400 font-mono">
+                            @menu.FechaMenu.ToString("dd/MM/yyyy")
+                        </span>
+                    </div>
+
+                    <!-- Título del Menú -->
+                    <h3 class="text-base font-extrabold text-slate-900 group-hover:text-blue-600 transition">
+                        @menu.NombreMenu
+                    </h3>
+
+                    <!-- Resumen de alimentos -->
+                    <p class="text-xs text-slate-500 mt-1 line-clamp-2">
+                        @(string.IsNullOrWhiteSpace(menu.DetalleAlimentosResumen) ? "Alimentos seleccionados según balance escolar." : menu.DetalleAlimentosResumen)
+                    </p>
+                </div>
+
+                <!-- Botones flotantes en hover (Mockup Imagen 9) -->
+                <div class="hidden group-hover:flex items-center gap-1.5 pt-3 my-2 border-t border-slate-100 animate-in fade-in duration-150">
+                    <button type="button" onclick="verDetalleMenu(@menu.Id)"
+                            class="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold shadow-sm flex items-center gap-1">
+                        <span>👁️ Ver</span>
+                    </button>
+                    <a href="/Modules/03_Alimentos/CrearMenu?id=@menu.Id"
+                       class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold flex items-center gap-1">
+                        <span>✏️ Editar</span>
+                    </a>
+                    <button type="button" onclick="clonarMenu(@menu.Id)"
+                            class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold flex items-center gap-1">
+                        <span>📋 Clonar</span>
+                    </button>
+                    <button type="button" onclick="eliminarMenu(@menu.Id)"
+                            class="px-2 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-[11px] font-bold">
+                        🗑️
+                    </button>
+                </div>
+
+                <!-- Pie de Tarjeta: Calorías y Punto de Semáforo -->
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-between mt-2">
+                    <span class="text-base font-black text-slate-900">
+                        @((int)menu.TotalCalorias) kcal
+                    </span>
+                    <span class="w-5 h-5 rounded-full @semaforoColor flex items-center justify-center text-[10px] shadow-sm font-bold"
+                          title="Semáforo: @menu.Semaforo">
+                        ●
+                    </span>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- LEYENDA EXPLICATIVA DE ESTADOS Y VARIANTES (MOCKUP IMAGEN 9) -->
+    <div class="bg-slate-100/70 border border-slate-200 rounded-2xl p-5 text-xs text-slate-600 space-y-3">
+        <h4 class="font-extrabold text-slate-800 text-sm">Estados y variantes de la tarjeta</h4>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <p><strong>Estándar:</strong> borde gris, sin banner especial</p>
+                <p><strong>Hover:</strong> borde azul, muestra 4 acciones (Ver, Editar, Clonar, Eliminar)</p>
+                <p><strong>Usado esta semana:</strong> borde verde + chip</p>
+                <p><strong>Nuevo:</strong> borde azul + chip "✨ Nuevo"</p>
+            </div>
+            <div>
+                <p class="font-bold text-slate-700 mb-1">Semáforo (círculo inferior derecho):</p>
+                <p class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> <strong>Verde:</strong> Menú saludable</p>
+                <p class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> <strong>Amarillo:</strong> Aceptable, revisar</p>
+                <p class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> <strong>Rojo:</strong> Fuera de rango</p>
+            </div>
+            <div>
+                <p><strong>Dimensiones:</strong> 380 × 280 px adaptativo</p>
+                <p><strong>Radio:</strong> 16 px (rounded-2xl)</p>
+                <p><strong>Grid:</strong> 4 columnas en escritorio</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- DIAGRAMA DE FLUJO INTERACTIVO DEL MÓDULO 03 (MOCKUP IMAGEN 10) -->
+    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5 text-xs">
+        <div class="flex items-center justify-between">
+            <h4 class="font-extrabold text-slate-900 text-sm">🗺️ Mapa de Flujo del Módulo de Alimentos (User Flow)</h4>
+            <span class="text-[11px] text-slate-400">Haz clic en los nodos para navegar</span>
+        </div>
+
+        <!-- Rama 1: Catálogo de Alimentos -->
+        <div class="flex flex-wrap items-center gap-2">
+            <span class="px-3.5 py-1.5 rounded-full bg-emerald-500 text-white font-bold">● INICIO</span>
+            <span class="text-slate-400">&rarr;</span>
+            <a href="/Dashboard" class="px-3.5 py-1.5 rounded-lg bg-[#1e293b] text-white font-bold">Dashboard</a>
+            <span class="text-slate-400">&rarr;</span>
+            <a href="/Modules/03_Alimentos" class="px-3.5 py-1.5 rounded-lg bg-[#1e293b] text-white font-bold">Catálogo Alimentos</a>
+            <span class="text-slate-400">&rarr;</span>
+            <a href="/Modules/03_Alimentos" class="px-3.5 py-1.5 rounded-lg border border-blue-400 text-blue-600 font-semibold">Ver Lista</a>
+            <span class="text-slate-400">&rarr;</span>
+            <a href="/Modules/03_Alimentos" class="px-3.5 py-1.5 rounded-lg bg-blue-600 text-white font-bold">+ Nuevo Alimento</a>
+            <span class="text-slate-400">&rarr;</span>
+            <span class="px-3.5 py-1.5 rounded-lg border border-blue-400 text-blue-600 font-semibold">Modal Form</span>
+            <span class="text-slate-400">&rarr;</span>
+            <span class="px-3.5 py-1.5 rounded-lg bg-emerald-500 text-white font-bold">Guardar</span>
+            <span class="text-slate-400">&rarr;</span>
+            <span class="px-3.5 py-1.5 rounded-lg bg-emerald-100 text-emerald-800 font-bold">✔ Toast éxito</span>
+        </div>
+
+        <!-- Rama 2: Menús Diarios -->
+        <div class="flex flex-wrap items-center gap-2 pt-1">
+            <span class="px-3.5 py-1.5 rounded-lg bg-[#1e293b] text-white font-bold">Menús Diarios</span>
+            <span class="text-slate-400">&rarr;</span>
+            <a href="/Modules/03_Alimentos/CrearMenu" class="px-3.5 py-1.5 rounded-lg bg-blue-600 text-white font-bold">+ Nuevo Menú</a>
+            <span class="text-slate-400">&rarr;</span>
+            <a href="/Modules/03_Alimentos/CrearMenu" class="px-3.5 py-1.5 rounded-lg border border-blue-400 text-blue-600 font-semibold">Paso 1: Datos</a>
+            <span class="text-slate-400">&rarr;</span>
+            <a href="/Modules/03_Alimentos/CrearMenu" class="px-3.5 py-1.5 rounded-lg border border-blue-400 text-blue-600 font-semibold">Paso 2: Alimentos</a>
+            <span class="text-slate-400">&rarr;</span>
+            <a href="/Modules/03_Alimentos/CrearMenu" class="px-3.5 py-1.5 rounded-lg border border-blue-400 text-blue-600 font-semibold">Paso 3: Cantidades</a>
+            <span class="text-slate-400">&rarr;</span>
+            <a href="/Modules/03_Alimentos/CrearMenu" class="px-3.5 py-1.5 rounded-lg border border-blue-400 text-blue-600 font-semibold">Paso 4: Resumen</a>
+            <span class="text-slate-400">&rarr;</span>
+            <span class="px-3.5 py-1.5 rounded-full bg-emerald-500 text-white font-bold">✔ Menú guardado</span>
+        </div>
+
+        <!-- Flujos alternativos y Leyenda -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-3 border-t border-slate-100">
+            <div>
+                <p class="font-bold text-slate-800 mb-2">Flujos alternativos</p>
+                <div class="flex flex-wrap gap-2">
+                    <span class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 font-medium">Editar alimento</span>
+                    <span class="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 font-medium">Eliminar + confirmar</span>
+                    <span class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 font-medium">Clonar menú</span>
+                    <span class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 font-medium">Buscar</span>
+                    <span class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 font-medium">Filtrar</span>
+                </div>
+            </div>
+            <div class="bg-slate-50 rounded-xl p-3 border border-slate-200">
+                <p class="font-bold text-slate-800 mb-2">Leyenda</p>
+                <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-600">
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-emerald-500"></span> Inicio / Éxito</div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded border border-blue-500 bg-white"></span> Pantalla / vista</div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-[#1e293b]"></span> Navegación principal</div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-red-100 border border-red-300"></span> Acción destructiva</div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-blue-600"></span> Acción del usuario</div>
+                    <div class="flex items-center gap-2"><span class="text-slate-400">---</span> Flujo alternativo</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL: DETALLE DEL MENÚ (HU-17: Ver Resumen Nutricional) -->
+<div id="modalDetalleMenu" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 p-6 relative">
+        <button type="button" onclick="cerrarDetalleMenu()"
+                class="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center text-sm font-bold">
+            ✕
+        </button>
+
+        <div id="detalleMenuContenido" class="space-y-4">
+            <!-- Cargado dinámicamente con JS -->
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        async function verDetalleMenu(id) {
+            try {
+                const res = await fetch(`/api/alimentos/menus/${id}`);
+                if (!res.ok) return;
+                const m = await res.json();
+
+                const semBg = m.semaforo === 'Verde' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' :
+                              m.semaforo === 'Amarillo' ? 'bg-amber-50 text-amber-800 border-amber-200' :
+                              'bg-red-50 text-red-800 border-red-200';
+
+                let itemsHtml = '';
+                if (m.items && m.items.length) {
+                    m.items.forEach(it => {
+                        const nombreAlim = it.alimento ? it.alimento.nombre : 'Alimento';
+                        itemsHtml += `
+                            <div class="flex items-center justify-between py-2 border-b border-slate-100 text-xs">
+                                <div>
+                                    <p class="font-bold text-slate-800">${nombreAlim}</p>
+                                    <p class="text-slate-400 text-[11px]">${it.cantidad} ${it.unidad}</p>
+                                </div>
+                                <span class="font-mono font-bold text-slate-700">${Math.round(it.subtotalCalorias)} kcal</span>
+                            </div>
+                        `;
+                    });
+                } else {
+                    itemsHtml = '<p class="text-xs text-slate-400 py-2">Sin desglose registrado.</p>';
+                }
+
+                document.getElementById('detalleMenuContenido').innerHTML = `
+                    <div class="border-b border-slate-100 pb-3">
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold border ${semBg}">
+                            Semáforo ${m.semaforo}
+                        </span>
+                        <h2 class="text-xl font-extrabold text-slate-900 mt-2">${m.nombreMenu}</h2>
+                        <p class="text-xs text-slate-500">${m.tipoComida} • ${new Date(m.fechaMenu).toLocaleDateString()}</p>
+                    </div>
+
+                    <div class="grid grid-cols-4 gap-2 text-center py-2 bg-slate-50 rounded-2xl border border-slate-200 text-xs">
+                        <div><p class="text-slate-400 text-[10px]">Calorías</p><p class="font-extrabold text-slate-900">${Math.round(m.totalCalorias)} kcal</p></div>
+                        <div><p class="text-slate-400 text-[10px]">Proteínas</p><p class="font-extrabold text-emerald-700">${m.totalProteinas} g</p></div>
+                        <div><p class="text-slate-400 text-[10px]">Carbos</p><p class="font-extrabold text-blue-700">${m.totalCarbohidratos} g</p></div>
+                        <div><p class="text-slate-400 text-[10px]">Grasas</p><p class="font-extrabold text-amber-700">${m.totalGrasas} g</p></div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Alimentos del Menú:</h4>
+                        <div class="max-h-48 overflow-y-auto">${itemsHtml}</div>
+                    </div>
+
+                    <div class="pt-2 flex justify-end">
+                        <button type="button" onclick="cerrarDetalleMenu()"
+                                class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
+                            Cerrar
+                        </button>
+                    </div>
+                `;
+
+                document.getElementById('modalDetalleMenu').classList.remove('hidden');
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function cerrarDetalleMenu() {
+            document.getElementById('modalDetalleMenu').classList.add('hidden');
+        }
+
+        async function clonarMenu(id) {
+            try {
+                const res = await fetch(`/api/alimentos/menus/${id}/clonar`, { method: 'POST' });
+                if (res.ok) {
+                    alert('¡Menú clonado con éxito!');
+                    location.reload();
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function eliminarMenu(id) {
+            if (!confirm('¿Deseas eliminar este menú diario?')) return;
+            try {
+                const res = await fetch(`/api/alimentos/menus/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    location.reload();
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    </script>
+}

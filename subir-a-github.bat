@@ -1,6 +1,6 @@
 @echo off
 chcp 65001 >nul
-title SmartNutriTracker - Subir a GitHub
+title SmartNutriTracker - Subir a GitHub (main + equipo-3-alimentos + ramas)
 color 0B
 
 set "PROJECT_DIR=%~dp0NutriProy"
@@ -17,29 +17,26 @@ echo ===========================================================================
 echo     🌱 SMARTNUTRITRACKER - SUBIR CAMBIOS A GITHUB
 echo ===============================================================================
 echo.
-echo  Estado actual del repositorio:
-git status -s
-echo.
 echo  Ultimo commit listo para subir:
 git log -n 1 --oneline
 echo.
-echo  Ejecutando git push origin main...
+echo  Subiendo rama 'main' y rama 'equipo-3-alimentos' (junto con las demas ramas)...
 echo ===============================================================================
 echo.
 
-git push origin main
+git push origin main equipo-3-alimentos --all
 
 if %ERRORLEVEL% equ 0 (
     color 0A
     echo.
     echo ===============================================================================
-    echo     ✅ ¡CAMBIOS SUBIDOS EXITOSAMENTE A GITHUB!
+    echo     ✅ ¡CAMBIOS SUBIDOS EXITOSAMENTE A MAIN Y EQUIPO-3-ALIMENTOS EN GITHUB!
     echo ===============================================================================
 ) else (
     color 0C
     echo.
     echo ===============================================================================
-    echo     ❌ Hubo un detalle de autenticacion. Verifica tus credenciales de GitHub.
+    echo     ❌ Hubo un detalle al subir. Revisa el mensaje superior.
     echo ===============================================================================
 )
 

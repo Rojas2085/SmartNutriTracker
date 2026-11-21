@@ -162,13 +162,98 @@ public static class DbInitializer
             // ==========================================
             var alimentosSemilla = new List<Alimento>
             {
-                new() { Nombre = "Manzana Roja", Categoria = "Frutas", PorcionReferencia = "1 unidad mediana (150g)", GramosPorcion = 150m, Calorias = 78m, ProteinasGramos = 0.4m, CarbohidratosGramos = 21m, GrasasGramos = 0.2m, SemaforoNutricional = "Verde", EsAptoQuioscoEscolar = true, Descripcion = "Rica en fibra y antioxidantes." },
-                new() { Nombre = "Plátano de Seda", Categoria = "Frutas", PorcionReferencia = "1 unidad (120g)", GramosPorcion = 120m, Calorias = 105m, ProteinasGramos = 1.3m, CarbohidratosGramos = 27m, GrasasGramos = 0.3m, SemaforoNutricional = "Verde", EsAptoQuioscoEscolar = true, Descripcion = "Excelente fuente de potasio y energía." },
-                new() { Nombre = "Sándwich de Pollo con Lechuga", Categoria = "Proteínas/Cereales", PorcionReferencia = "1 unidad (180g)", GramosPorcion = 180m, Calorias = 265m, ProteinasGramos = 18.5m, CarbohidratosGramos = 28m, GrasasGramos = 6.2m, SemaforoNutricional = "Verde", EsAptoQuioscoEscolar = true, Descripcion = "Pan integral con pechuga desmenuzada y vegetales frescos." },
-                new() { Nombre = "Yogurt Natural con Semillas de Chía", Categoria = "Lácteos", PorcionReferencia = "1 vaso (200ml)", GramosPorcion = 200m, Calorias = 140m, ProteinasGramos = 7.0m, CarbohidratosGramos = 16m, GrasasGramos = 3.5m, SemaforoNutricional = "Amarillo", EsAptoQuioscoEscolar = true, Descripcion = "Aporte proteico y probiótico para el recreo." },
-                new() { Nombre = "Gaseosa Cola 350ml", Categoria = "Bebidas Azucaradas", PorcionReferencia = "1 lata (350ml)", GramosPorcion = 350m, Calorias = 150m, ProteinasGramos = 0m, CarbohidratosGramos = 39m, GrasasGramos = 0m, SemaforoNutricional = "Rojo", EsAptoQuioscoEscolar = false, Descripcion = "Bebida alta en azúcares refinados. Restringida en quiosco." }
+                new() { Nombre = "Pechuga de Pollo", Categoria = "Carnes", Icono = "🥩", PorcionReferencia = "100 g", GramosPorcion = 100m, Calorias = 165m, ProteinasGramos = 31m, CarbohidratosGramos = 0m, GrasasGramos = 3.6m, SemaforoNutricional = "Verde", EsFavorito = true, EsAptoQuioscoEscolar = true, Descripcion = "Proteína magra de alto valor biológico." },
+                new() { Nombre = "Arroz Integral", Categoria = "Cereales", Icono = "🌾", PorcionReferencia = "100 g", GramosPorcion = 100m, Calorias = 216m, ProteinasGramos = 5m, CarbohidratosGramos = 45m, GrasasGramos = 1.8m, SemaforoNutricional = "Verde", EsFavorito = true, EsAptoQuioscoEscolar = true, Descripcion = "Carbohidrato complejo rico en fibra." },
+                new() { Nombre = "Manzana", Categoria = "Frutas", Icono = "🍎", PorcionReferencia = "1 unidad (100g)", GramosPorcion = 100m, Calorias = 52m, ProteinasGramos = 0.3m, CarbohidratosGramos = 14m, GrasasGramos = 0.2m, SemaforoNutricional = "Verde", EsFavorito = true, EsAptoQuioscoEscolar = true, Descripcion = "Fruta fresca rica en pectina y antioxidantes." },
+                new() { Nombre = "Leche Entera", Categoria = "Lácteos", Icono = "🥛", PorcionReferencia = "1 vaso (200ml)", GramosPorcion = 200m, Calorias = 124m, ProteinasGramos = 6.4m, CarbohidratosGramos = 9.6m, GrasasGramos = 7.0m, SemaforoNutricional = "Amarillo", EsFavorito = false, EsAptoQuioscoEscolar = true, Descripcion = "Fuente de calcio y vitamina D." },
+                new() { Nombre = "Brócoli al Vapor", Categoria = "Verduras", Icono = "🥦", PorcionReferencia = "1 taza (100g)", GramosPorcion = 100m, Calorias = 35m, ProteinasGramos = 2.8m, CarbohidratosGramos = 7m, GrasasGramos = 0.4m, SemaforoNutricional = "Verde", EsFavorito = false, EsAptoQuioscoEscolar = true, Descripcion = "Verdura crucífera rica en vitamina C y fibra." },
+                new() { Nombre = "Salmón a la Plancha", Categoria = "Carnes", Icono = "🐟", PorcionReferencia = "100 g", GramosPorcion = 100m, Calorias = 206m, ProteinasGramos = 22m, CarbohidratosGramos = 0m, GrasasGramos = 12m, SemaforoNutricional = "Verde", EsFavorito = false, EsAptoQuioscoEscolar = true, Descripcion = "Alto en ácidos grasos Omega-3." },
+                new() { Nombre = "Quinoa Cocida", Categoria = "Cereales", Icono = "🥣", PorcionReferencia = "100 g", GramosPorcion = 100m, Calorias = 120m, ProteinasGramos = 4.4m, CarbohidratosGramos = 21.3m, GrasasGramos = 1.9m, SemaforoNutricional = "Verde", EsFavorito = false, EsAptoQuioscoEscolar = true, Descripcion = "Grano andino con aminoácidos esenciales." },
+                new() { Nombre = "Yogurt Natural", Categoria = "Lácteos", Icono = "🥣", PorcionReferencia = "150 g", GramosPorcion = 150m, Calorias = 92m, ProteinasGramos = 5.2m, CarbohidratosGramos = 7.0m, GrasasGramos = 5.0m, SemaforoNutricional = "Verde", EsFavorito = true, EsAptoQuioscoEscolar = true, Descripcion = "Aporte de probióticos y proteínas." },
+                new() { Nombre = "Almendras", Categoria = "Saludables", Icono = "🥜", PorcionReferencia = "30 g", GramosPorcion = 30m, Calorias = 174m, ProteinasGramos = 6.3m, CarbohidratosGramos = 6.6m, GrasasGramos = 15m, SemaforoNutricional = "Verde", EsFavorito = false, EsAptoQuioscoEscolar = true, Descripcion = "Grasas saludables y vitamina E." },
+                new() { Nombre = "Espinacas Frescas", Categoria = "Verduras", Icono = "🥬", PorcionReferencia = "100 g", GramosPorcion = 100m, Calorias = 23m, ProteinasGramos = 2.9m, CarbohidratosGramos = 3.6m, GrasasGramos = 0.4m, SemaforoNutricional = "Verde", EsFavorito = false, EsAptoQuioscoEscolar = true, Descripcion = "Hojas verdes ricas en hierro y folatos." }
             };
             await context.Alimentos.AddRangeAsync(alimentosSemilla);
+            await context.SaveChangesAsync();
+
+            // MENÚS DIARIOS DE EJEMPLO (MOCKUP GRUPO 3)
+            var menu1 = new MenuDiario
+            {
+                NombreMenu = "Desayuno Energético",
+                FechaMenu = new DateTime(2024, 1, 15),
+                TipoComida = "Desayuno",
+                EstadoVariante = "Estándar",
+                TotalCalorias = 432m,
+                TotalProteinas = 31m,
+                TotalCarbohidratos = 45m,
+                TotalGrasas = 9m,
+                Semaforo = "Verde",
+                EsSaludable = true,
+                DetalleAlimentosResumen = "Pechuga de Pollo, Arroz Integral, Manzana...",
+                NutricionistaId = usuarioNutriAlimentos.Id,
+                EstudianteId = usuarioEstudiante.Id
+            };
+
+            var menu2 = new MenuDiario
+            {
+                NombreMenu = "Almuerzo Completo",
+                FechaMenu = new DateTime(2024, 1, 14),
+                TipoComida = "Almuerzo",
+                EstadoVariante = "Estándar",
+                TotalCalorias = 520m,
+                TotalProteinas = 36m,
+                TotalCarbohidratos = 52m,
+                TotalGrasas = 14m,
+                Semaforo = "Verde",
+                EsSaludable = true,
+                DetalleAlimentosResumen = "Salmón, Quinoa, Brócoli, Espinaca...",
+                NutricionistaId = usuarioNutriAlimentos.Id,
+                EstudianteId = usuarioEstudiante.Id
+            };
+
+            var menu3 = new MenuDiario
+            {
+                NombreMenu = "Merienda Ligera",
+                FechaMenu = new DateTime(2024, 1, 13),
+                TipoComida = "Merienda",
+                EstadoVariante = "Usado esta semana",
+                TotalCalorias = 245m,
+                TotalProteinas = 12m,
+                TotalCarbohidratos = 28m,
+                TotalGrasas = 8m,
+                Semaforo = "Verde",
+                EsSaludable = true,
+                DetalleAlimentosResumen = "Yogurt Natural, Manzana, Almendras...",
+                NutricionistaId = usuarioNutriAlimentos.Id,
+                EstudianteId = usuarioEstudiante.Id
+            };
+
+            var menu4 = new MenuDiario
+            {
+                NombreMenu = "Cena Saludable",
+                FechaMenu = new DateTime(2024, 1, 15),
+                TipoComida = "Cena",
+                EstadoVariante = "Nuevo",
+                TotalCalorias = 378m,
+                TotalProteinas = 26m,
+                TotalCarbohidratos = 35m,
+                TotalGrasas = 11m,
+                Semaforo = "Amarillo",
+                EsSaludable = true,
+                DetalleAlimentosResumen = "Pollo, Verduras al vapor, Ensalada...",
+                NutricionistaId = usuarioNutriAlimentos.Id,
+                EstudianteId = usuarioEstudiante.Id
+            };
+
+            await context.MenusDiarios.AddRangeAsync(menu1, menu2, menu3, menu4);
+            await context.SaveChangesAsync();
+
+            // Detalles del Menú 1
+            await context.DetallesMenuAlimentos.AddRangeAsync(
+                new DetalleMenuAlimento { MenuDiarioId = menu1.Id, AlimentoId = alimentosSemilla[0].Id, Cantidad = 150m, Unidad = "g", SubtotalCalorias = 248m, SubtotalProteinas = 31m, SubtotalCarbohidratos = 0m, SubtotalGrasas = 3.6m },
+                new DetalleMenuAlimento { MenuDiarioId = menu1.Id, AlimentoId = alimentosSemilla[1].Id, Cantidad = 80m, Unidad = "g", SubtotalCalorias = 173m, SubtotalProteinas = 4m, SubtotalCarbohidratos = 36m, SubtotalGrasas = 1.4m },
+                new DetalleMenuAlimento { MenuDiarioId = menu1.Id, AlimentoId = alimentosSemilla[2].Id, Cantidad = 1m, Unidad = "unid", SubtotalCalorias = 52m, SubtotalProteinas = 0.3m, SubtotalCarbohidratos = 14m, SubtotalGrasas = 0.2m }
+            );
             await context.SaveChangesAsync();
 
             // ==========================================

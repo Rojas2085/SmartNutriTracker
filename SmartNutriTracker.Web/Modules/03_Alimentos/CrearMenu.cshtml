@@ -1,0 +1,832 @@
+@page "/Modules/03_Alimentos/CrearMenu"
+@model SmartNutriTracker.Web.Modules.Alimentos.CrearMenuModel
+@{
+    Layout = "/Pages/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Crear Nuevo Menú Diario - Wizard (Equipo 3)";
+}
+
+<div class="space-y-6 max-w-5xl mx-auto">
+
+    <!-- SUB-BARRA DE NAVEGACIÓN -->
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3">
+        <div class="flex items-center gap-2">
+            <a href="/Modules/03_Alimentos"
+               class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-700 border border-slate-200 hover:border-blue-400 hover:text-blue-600 transition">
+                📋 Catálogo de Alimentos
+            </a>
+            <a href="/Modules/03_Alimentos/Menus"
+               class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-700 border border-slate-200 hover:border-blue-400 hover:text-blue-600 transition">
+                🍲 Menús Diarios
+            </a>
+            <a href="/Modules/03_Alimentos/CrearMenu"
+               class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#2563eb] text-white shadow-sm transition">
+                ✨ + Crear Menú (Wizard)
+            </a>
+        </div>
+        <div class="text-xs text-slate-500 font-medium">
+            Wizard Interactivo de 4 Pasos &bull; HU-16, HU-17
+        </div>
+    </div>
+
+    <!-- STEPPER HEADER (MOCKUPS IMÁGENES 3, 5, 6) -->
+    <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm">
+        <div class="grid grid-cols-4 items-center gap-2 text-center text-xs">
+            
+            <!-- Paso 1 -->
+            <div id="step-indicator-1" class="step-indicator flex items-center justify-center gap-2 active text-blue-600 font-bold">
+                <span class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">1</span>
+                <span class="hidden sm:inline">📋 Datos Generales</span>
+            </div>
+
+            <!-- Paso 2 -->
+            <div id="step-indicator-2" class="step-indicator flex items-center justify-center gap-2 text-slate-400 font-medium">
+                <span class="w-7 h-7 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold">2</span>
+                <span class="hidden sm:inline">🍽️ Agregar Alimentos</span>
+            </div>
+
+            <!-- Paso 3 -->
+            <div id="step-indicator-3" class="step-indicator flex items-center justify-center gap-2 text-slate-400 font-medium">
+                <span class="w-7 h-7 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold">3</span>
+                <span class="hidden sm:inline">⚖️ Cantidades</span>
+            </div>
+
+            <!-- Paso 4 -->
+            <div id="step-indicator-4" class="step-indicator flex items-center justify-center gap-2 text-slate-400 font-medium">
+                <span class="w-7 h-7 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold">4</span>
+                <span class="hidden sm:inline">✅ Resumen Final</span>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- CONTENEDOR PRINCIPAL DEL WIZARD -->
+    <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm min-h-[460px]">
+
+        <!-- ===================================================================
+             PASO 1: DATOS GENERALES (MOCKUP IMÁGENES 3 Y 4)
+             =================================================================== -->
+        <div id="wizard-paso-1" class="wizard-paso space-y-6">
+            <div>
+                <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Crear Nuevo Menú Diario</h2>
+                <p class="text-xs text-slate-500 mt-1">Completa la información básica del menú</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1.5">Nombre del menú *</label>
+                    <input type="text" id="wizNombreMenu" value="Desayuno Energético" placeholder="Ej. Desayuno Energético"
+                           class="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1.5">Fecha *</label>
+                    <div class="relative">
+                        <input type="date" id="wizFechaMenu" value="@DateTime.Today.ToString("yyyy-MM-dd")"
+                               class="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tipo de comida con Radio Pills visuales (Mockup Imagen 3 y 4) -->
+            <div>
+                <label class="block font-bold text-slate-700 mb-2 text-xs">Tipo de comida *</label>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                    <label class="radio-card active cursor-pointer p-3.5 rounded-2xl border-2 border-blue-500 bg-blue-50/70 flex items-center gap-2 font-bold text-slate-800 transition">
+                        <input type="radio" name="wizTipoComida" value="Desayuno" checked class="hidden" onchange="seleccionarTipoComida(this)" />
+                        <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+                        <span>🥞 Desayuno</span>
+                    </label>
+                    <label class="radio-card cursor-pointer p-3.5 rounded-2xl border border-slate-200 hover:border-slate-300 flex items-center gap-2 font-semibold text-slate-600 transition">
+                        <input type="radio" name="wizTipoComida" value="Almuerzo" class="hidden" onchange="seleccionarTipoComida(this)" />
+                        <span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
+                        <span>🍲 Almuerzo</span>
+                    </label>
+                    <label class="radio-card cursor-pointer p-3.5 rounded-2xl border border-slate-200 hover:border-slate-300 flex items-center gap-2 font-semibold text-slate-600 transition">
+                        <input type="radio" name="wizTipoComida" value="Merienda" class="hidden" onchange="seleccionarTipoComida(this)" />
+                        <span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
+                        <span>🥪 Merienda</span>
+                    </label>
+                    <label class="radio-card cursor-pointer p-3.5 rounded-2xl border border-slate-200 hover:border-slate-300 flex items-center gap-2 font-semibold text-slate-600 transition">
+                        <input type="radio" name="wizTipoComida" value="Cena" class="hidden" onchange="seleccionarTipoComida(this)" />
+                        <span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
+                        <span>🌙 Cena</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Selector de Estudiante -->
+            <div class="text-xs max-w-sm">
+                <label class="block font-bold text-slate-700 mb-1.5">Estudiante</label>
+                <select id="wizEstudiante" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Selecciona un estudiante</option>
+                    @foreach (var est in Model.Estudiantes)
+                    {
+                        <option value="@est.Id">@est.NombreCompleto (@est.Rol)</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Botones Paso 1 -->
+            <div class="pt-6 border-t border-slate-100 flex items-center justify-between">
+                <a href="/Modules/03_Alimentos/Menus" class="text-xs font-semibold text-slate-500 hover:text-slate-800">
+                    Cancelar
+                </a>
+                <button type="button" onclick="irAlPaso(2)"
+                        class="px-6 py-2.5 rounded-xl bg-[#2563eb] hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition">
+                    Siguiente &rarr;
+                </button>
+            </div>
+        </div>
+
+        <!-- ===================================================================
+             PASO 2: AGREGAR ALIMENTOS
+             =================================================================== -->
+        <div id="wizard-paso-2" class="wizard-paso space-y-6 hidden">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Selecciona los Alimentos</h2>
+                    <p class="text-xs text-slate-500 mt-1">Elige los alimentos del catálogo escolar para componer el menú</p>
+                </div>
+                <div class="text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-xl">
+                    <span id="cantAlimentosSeleccionados">0</span> seleccionados
+                </div>
+            </div>
+
+            <!-- Buscador interno de alimentos -->
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 text-xs">🔍</span>
+                <input type="text" id="wizBuscarAlimento" oninput="filtrarCatalogoWiz()" placeholder="Buscar alimento para añadir..."
+                       class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <!-- Grid de selección de alimentos -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[350px] overflow-y-auto pr-1">
+                @foreach (var alim in Model.CatalogoAlimentos)
+                {
+                    <div class="card-item-alimento p-3 rounded-2xl border border-slate-200 hover:border-blue-400 bg-white transition flex items-center justify-between gap-3 text-xs"
+                         data-id="@alim.Id"
+                         data-nombre="@alim.Nombre"
+                         data-icono="@alim.Icono"
+                         data-calorias="@alim.Calorias"
+                         data-prot="@alim.ProteinasGramos"
+                         data-carb="@alim.CarbohidratosGramos"
+                         data-grasa="@alim.GrasasGramos"
+                         data-porcion="@alim.GramosPorcion">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <span class="text-2xl shrink-0">@alim.Icono</span>
+                            <div class="truncate">
+                                <p class="font-bold text-slate-800 truncate">@alim.Nombre</p>
+                                <p class="text-[11px] text-slate-400">@alim.Categoria &bull; @((int)alim.Calorias) kcal</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="toggleSeleccionAlimento(this, @alim.Id)"
+                                class="btn-toggle-alim px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-blue-600 hover:text-white text-slate-700 font-bold text-xs shrink-0 transition">
+                            + Añadir
+                        </button>
+                    </div>
+                }
+            </div>
+
+            <!-- Botones Paso 2 -->
+            <div class="pt-6 border-t border-slate-100 flex items-center justify-between">
+                <button type="button" onclick="irAlPaso(1)" class="text-xs font-semibold text-slate-500 hover:text-slate-800">
+                    &larr; Anterior
+                </button>
+                <button type="button" onclick="irAlPaso(3)"
+                        class="px-6 py-2.5 rounded-xl bg-[#2563eb] hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition">
+                    Siguiente &rarr;
+                </button>
+            </div>
+        </div>
+
+        <!-- ===================================================================
+             PASO 3: ESPECIFICA LAS CANTIDADES (MOCKUP IMAGEN 6)
+             =================================================================== -->
+        <div id="wizard-paso-3" class="wizard-paso space-y-6 hidden">
+            <div>
+                <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Especifica las cantidades</h2>
+                <p class="text-xs text-slate-500 mt-1">Ajusta el gramaje de cada alimento</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                
+                <!-- Columna Izquierda: Lista de alimentos seleccionados -->
+                <div class="lg:col-span-7 space-y-3">
+                    <div id="listaCantidadesAlimentos" class="space-y-2.5">
+                        <!-- Generado dinámicamente con JS -->
+                    </div>
+
+                    <!-- Progreso: 75% completado (Mockup Imagen 6) -->
+                    <div class="pt-4">
+                        <div class="flex items-center justify-between text-xs font-bold text-slate-600 mb-1.5">
+                            <span>Progreso: 75% completado</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                            <div class="bg-blue-600 h-2 rounded-full" style="width: 75%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha: Resumen Preliminar en Tiempo Real (Mockup Imagen 6) -->
+                <div class="lg:col-span-5 bg-slate-50 rounded-2xl p-5 border border-slate-200/80 space-y-4 text-xs">
+                    <h3 class="font-extrabold text-slate-800 text-sm">Resumen preliminar</h3>
+
+                    <!-- Calorías -->
+                    <div class="space-y-1">
+                        <div class="flex items-center justify-between font-bold">
+                            <span class="text-slate-600">Calorías</span>
+                            <span id="prevCalorias" class="text-slate-900 font-extrabold font-mono">432 kcal</span>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                            <div id="prevBarCalorias" class="bg-emerald-500 h-2 rounded-full" style="width: 86%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Proteínas -->
+                    <div class="space-y-1">
+                        <div class="flex items-center justify-between font-bold">
+                            <span class="text-slate-600">Proteínas</span>
+                            <span id="prevProteinas" class="text-slate-900 font-extrabold font-mono">31 g</span>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                            <div id="prevBarProteinas" class="bg-emerald-500 h-2 rounded-full" style="width: 100%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Carbohidratos -->
+                    <div class="space-y-1">
+                        <div class="flex items-center justify-between font-bold">
+                            <span class="text-slate-600">Carbohidratos</span>
+                            <span id="prevCarbos" class="text-slate-900 font-extrabold font-mono">45 g</span>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                            <div id="prevBarCarbos" class="bg-blue-500 h-2 rounded-full" style="width: 90%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Grasas -->
+                    <div class="space-y-1">
+                        <div class="flex items-center justify-between font-bold">
+                            <span class="text-slate-600">Grasas</span>
+                            <span id="prevGrasas" class="text-slate-900 font-extrabold font-mono">9 g</span>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                            <div id="prevBarGrasas" class="bg-amber-500 h-2 rounded-full" style="width: 60%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Alert Badge verde (Mockup Imagen 6) -->
+                    <div id="prevAlertaBalance" class="p-3 rounded-xl bg-emerald-100/70 border border-emerald-200 text-emerald-800 text-[11px] font-medium flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-600 shrink-0"></span>
+                        <span><strong>Menú balanceado:</strong> Cumple con los rangos recomendados</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Botones Paso 3 -->
+            <div class="pt-6 border-t border-slate-100 flex items-center justify-between">
+                <button type="button" onclick="irAlPaso(2)" class="text-xs font-semibold text-slate-500 hover:text-slate-800">
+                    &larr; Anterior
+                </button>
+                <button type="button" onclick="irAlPaso(4)"
+                        class="px-6 py-2.5 rounded-xl bg-[#2563eb] hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition">
+                    Siguiente &rarr;
+                </button>
+            </div>
+        </div>
+
+        <!-- ===================================================================
+             PASO 4: ¡MENÚ LISTO! RESUMEN FINAL (MOCKUP IMÁGENES 5, 7, 8)
+             =================================================================== -->
+        <div id="wizard-paso-4" class="wizard-paso space-y-6 hidden">
+            <div>
+                <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">¡Menú Listo! 🎉</h2>
+                <p class="text-xs text-slate-500 mt-1">Revisa el resumen y guarda tu menú</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                
+                <!-- Columna Izquierda: Tarjeta Azul Oscuro y Tabla (Mockup Imagen 5) -->
+                <div class="lg:col-span-7 space-y-4">
+                    
+                    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                        <!-- Encabezado Azul Oscuro -->
+                        <div class="bg-[#1e293b] text-white p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                            <div>
+                                <h3 id="resumenTituloMenu" class="text-base font-extrabold tracking-tight">Menú: Desayuno Energético</h3>
+                                <div class="flex items-center gap-2 text-xs text-slate-300 mt-0.5">
+                                    <span id="resumenFechaMenu">📅 15/01/2024</span>
+                                    <span>&bull;</span>
+                                    <span id="resumenTipoComida">🥞 Desayuno</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabla de desglose de alimentos -->
+                        <div class="p-4">
+                            <table class="w-full text-left text-xs">
+                                <thead>
+                                    <tr class="text-slate-400 uppercase text-[10px] border-b border-slate-100 pb-2">
+                                        <th class="pb-2">ALIMENTO</th>
+                                        <th class="pb-2">CANTIDAD</th>
+                                        <th class="pb-2 text-right">KCAL</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="resumenTablaAlimentos" class="divide-y divide-slate-100">
+                                    <!-- Generado con JS -->
+                                </tbody>
+                                <tfoot>
+                                    <tr class="font-bold border-t border-slate-200 text-slate-900 text-xs">
+                                        <td class="pt-3 font-extrabold">Total</td>
+                                        <td class="pt-3"></td>
+                                        <td id="resumenTotalKcal" class="pt-3 text-right font-black text-sm text-slate-900">432 kcal</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Banner de Semáforo Grande (Mockup Imagen 5) -->
+                    <div id="bannerSemaforoGrande" class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center gap-3.5">
+                        <div class="w-10 h-10 rounded-full bg-emerald-500 shadow-md flex items-center justify-center shrink-0 text-white font-bold text-lg">
+                            ✔
+                        </div>
+                        <div>
+                            <p class="font-extrabold text-emerald-900 text-sm">🟢 VERDE — Menú Saludable y Balanceado</p>
+                            <p class="text-xs text-emerald-700">Cumple con todos los rangos nutricionales recomendados para estudiantes.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha: Widget Resumen Nutricional en Tiempo Real (Mockup Imagen 8) -->
+                <div class="lg:col-span-5 bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4 text-xs">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-extrabold text-slate-900 text-sm">Resumen Nutricional</h3>
+                        <span class="text-[11px] font-semibold text-emerald-700 flex items-center gap-1">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> En tiempo real
+                        </span>
+                    </div>
+
+                    <!-- Gran Orb Circular Verde (Mockup Imagen 8) -->
+                    <div class="flex flex-col items-center justify-center py-2">
+                        <div class="w-24 h-24 rounded-full border-4 border-emerald-400 bg-emerald-50 flex items-center justify-center shadow-inner relative">
+                            <div class="w-12 h-12 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50"></div>
+                        </div>
+                        <span class="mt-2 text-xs font-extrabold text-emerald-800">Menú Saludable</span>
+                    </div>
+
+                    <!-- Barras de macronutrientes -->
+                    <div class="space-y-3 pt-2">
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-bold text-slate-700">CALORÍAS</span>
+                                <span id="lblPaso4Calorias" class="font-black text-slate-900 font-mono">432 kcal / 500 (86%)</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                <div id="barPaso4Calorias" class="bg-emerald-500 h-2 rounded-full" style="width: 86%"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-bold text-slate-700">PROTEÍNAS</span>
+                                <span id="lblPaso4Prot" class="font-bold text-emerald-700">31 g &bull; 🟢 Excelente</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                <div id="barPaso4Prot" class="bg-emerald-500 h-2 rounded-full" style="width: 100%"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-bold text-slate-700">CARBOHIDRATOS</span>
+                                <span id="lblPaso4Carb" class="font-bold text-blue-700">45 g &bull; 🟢 Óptimo</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                <div id="barPaso4Carb" class="bg-blue-500 h-2 rounded-full" style="width: 90%"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-bold text-slate-700">GRASAS</span>
+                                <span id="lblPaso4Grasa" class="font-bold text-amber-700">9 g &bull; 🟡 Aceptable</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                <div id="barPaso4Grasa" class="bg-amber-500 h-2 rounded-full" style="width: 60%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recomendaciones Inteligentes (Mockup Imagen 8) -->
+                    <div class="pt-3 border-t border-slate-100 space-y-2">
+                        <p class="font-extrabold text-slate-800 text-[11px] uppercase tracking-wider">Recomendaciones:</p>
+                        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600">
+                            💡 Considera añadir aguacate o frutos secos para elevar las grasas saludables al rango óptimo.
+                        </div>
+                        <div class="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200 text-[11px] text-amber-800">
+                            ⚠️ Grasas por debajo del rango recomendado. Ajuste sugerido: +2-3 g.
+                        </div>
+                        <div class="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-200 text-[11px] text-emerald-800">
+                            💡 El aporte proteico es excelente para el perfil de estudiante activo.
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Botones Paso 4 (Mockup Imagen 5 y 7) -->
+            <div class="pt-6 border-t border-slate-100 flex items-center justify-between">
+                <button type="button" onclick="irAlPaso(3)" class="text-xs font-semibold text-slate-500 hover:text-slate-800">
+                    &larr; Anterior
+                </button>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="clonarEnPaso4()"
+                            class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition flex items-center gap-1.5">
+                        <span>📋 Clonar Menú</span>
+                    </button>
+                    <button type="button" onclick="guardarMenuFinal()" id="btnGuardarMenu"
+                            class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition flex items-center gap-1.5">
+                        <span>✔ Guardar Menú</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        let pasoActual = 1;
+        let alimentosSeleccionados = [
+            { id: 1, nombre: 'Pechuga de Pollo', icono: '🥩', cantidad: 150, unidad: 'g', calPor100: 165, protPor100: 31, carbPor100: 0, grasaPor100: 3.6 },
+            { id: 2, nombre: 'Arroz Integral', icono: '🌾', cantidad: 80, unidad: 'g', calPor100: 216, protPor100: 5, carbPor100: 45, grasaPor100: 1.8 },
+            { id: 3, nombre: 'Manzana', icono: '🍎', cantidad: 1, unidad: 'unid', calPor100: 52, protPor100: 0.3, carbPor100: 14, grasaPor100: 0.2 }
+        ];
+
+        function seleccionarTipoComida(radio) {
+            document.querySelectorAll('.radio-card').forEach(rc => {
+                rc.classList.remove('active', 'border-2', 'border-blue-500', 'bg-blue-50/70', 'font-bold');
+                rc.classList.add('border', 'border-slate-200', 'font-semibold', 'text-slate-600');
+                const dot = rc.querySelector('span');
+                if (dot) dot.className = 'w-2.5 h-2.5 rounded-full bg-slate-300';
+            });
+
+            const parent = radio.closest('.radio-card');
+            parent.classList.add('active', 'border-2', 'border-blue-500', 'bg-blue-50/70', 'font-bold');
+            parent.classList.remove('border', 'border-slate-200', 'font-semibold', 'text-slate-600');
+            const dot = parent.querySelector('span');
+            if (dot) dot.className = 'w-2.5 h-2.5 rounded-full bg-blue-600';
+        }
+
+        function irAlPaso(numPaso) {
+            if (numPaso < 1 || numPaso > 4) return;
+
+            document.querySelectorAll('.wizard-paso').forEach(p => p.classList.add('hidden'));
+            document.getElementById(`wizard-paso-${numPaso}`).classList.remove('hidden');
+
+            // Actualizar stepper
+            for (let i = 1; i <= 4; i++) {
+                const ind = document.getElementById(`step-indicator-${i}`);
+                const badge = ind.querySelector('span:first-child');
+                if (i < numPaso) {
+                    ind.className = 'step-indicator flex items-center justify-center gap-2 text-emerald-600 font-bold';
+                    badge.className = 'w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold';
+                    badge.textContent = '✔';
+                } else if (i === numPaso) {
+                    ind.className = 'step-indicator flex items-center justify-center gap-2 text-blue-600 font-bold';
+                    badge.className = 'w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold';
+                    badge.textContent = i;
+                } else {
+                    ind.className = 'step-indicator flex items-center justify-center gap-2 text-slate-400 font-medium';
+                    badge.className = 'w-7 h-7 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold';
+                    badge.textContent = i;
+                }
+            }
+
+            pasoActual = numPaso;
+
+            if (numPaso === 3) {
+                renderizarPaso3Cantidades();
+            } else if (numPaso === 4) {
+                renderizarPaso4Resumen();
+            }
+        }
+
+        function filtrarCatalogoWiz() {
+            const txt = document.getElementById('wizBuscarAlimento').value.trim().toLowerCase();
+            document.querySelectorAll('.card-item-alimento').forEach(card => {
+                const nom = card.getAttribute('data-nombre').toLowerCase();
+                card.style.display = (!txt || nom.includes(txt)) ? '' : 'none';
+            });
+        }
+
+        function toggleSeleccionAlimento(btn, id) {
+            const card = btn.closest('.card-item-alimento');
+            const index = alimentosSeleccionados.findIndex(a => a.id === id);
+
+            if (index >= 0) {
+                alimentosSeleccionados.splice(index, 1);
+                btn.textContent = '+ Añadir';
+                btn.className = 'btn-toggle-alim px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-blue-600 hover:text-white text-slate-700 font-bold text-xs shrink-0 transition';
+                card.classList.remove('border-blue-500', 'bg-blue-50/20');
+            } else {
+                alimentosSeleccionados.push({
+                    id: id,
+                    nombre: card.getAttribute('data-nombre'),
+                    icono: card.getAttribute('data-icono'),
+                    cantidad: 100,
+                    unidad: 'g',
+                    calPor100: parseFloat(card.getAttribute('data-calorias')),
+                    protPor100: parseFloat(card.getAttribute('data-prot')),
+                    carbPor100: parseFloat(card.getAttribute('data-carb')),
+                    grasaPor100: parseFloat(card.getAttribute('data-grasa'))
+                });
+                btn.textContent = '✔ Añadido';
+                btn.className = 'btn-toggle-alim px-3 py-1.5 rounded-xl bg-blue-600 text-white font-bold text-xs shrink-0 transition';
+                card.classList.add('border-blue-500', 'bg-blue-50/20');
+            }
+
+            document.getElementById('cantAlimentosSeleccionados').textContent = alimentosSeleccionados.length;
+        }
+
+        function renderizarPaso3Cantidades() {
+            const cont = document.getElementById('listaCantidadesAlimentos');
+            cont.innerHTML = '';
+
+            if (!alimentosSeleccionados.length) {
+                cont.innerHTML = '<p class="text-xs text-slate-400 p-4">No has seleccionado alimentos. Vuelve al Paso 2.</p>';
+                return;
+            }
+
+            alimentosSeleccionados.forEach((alim, idx) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs';
+                itemDiv.innerHTML = `
+                    <div class="flex items-center gap-2.5 font-bold text-slate-800">
+                        <span class="text-xl">${alim.icono}</span>
+                        <span>${alim.nombre}</span>
+                    </div>
+                    <div class="flex items-center gap-2.5">
+                        <span class="text-slate-400 font-medium">Cantidad</span>
+                        <input type="number" min="1" value="${alim.cantidad}" oninput="actualizarGramaje(${idx}, this.value)"
+                               class="w-16 px-2.5 py-1.5 rounded-xl border border-slate-200 text-center font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <select onchange="actualizarUnidad(${idx}, this.value)"
+                                class="px-2 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-semibold text-xs">
+                            <option value="g" ${alim.unidad === 'g' ? 'selected' : ''}>g ▾</option>
+                            <option value="unid" ${alim.unidad === 'unid' ? 'selected' : ''}>unid</option>
+                        </select>
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 shrink-0">
+                            🟢 Adecuado
+                        </span>
+                    </div>
+                `;
+                cont.appendChild(itemDiv);
+            });
+
+            recalcularMacrosPreliminar();
+        }
+
+        function actualizarGramaje(idx, val) {
+            alimentosSeleccionados[idx].cantidad = Math.max(1, parseFloat(val) || 1);
+            recalcularMacrosPreliminar();
+        }
+
+        function actualizarUnidad(idx, val) {
+            alimentosSeleccionados[idx].unidad = val;
+            recalcularMacrosPreliminar();
+        }
+
+        function recalcularMacrosPreliminar() {
+            let totalCal = 0, totalProt = 0, totalCarb = 0, totalGrasa = 0;
+
+            alimentosSeleccionados.forEach(a => {
+                const factor = a.unidad === 'unid' ? a.cantidad : (a.cantidad / 100);
+                totalCal += a.calPor100 * factor;
+                totalProt += a.protPor100 * factor;
+                totalCarb += a.carbPor100 * factor;
+                totalGrasa += a.grasaPor100 * factor;
+            });
+
+            document.getElementById('prevCalorias').textContent = `${Math.round(totalCal)} kcal`;
+            document.getElementById('prevProteinas').textContent = `${totalProt.toFixed(1)} g`;
+            document.getElementById('prevCarbos').textContent = `${totalCarb.toFixed(1)} g`;
+            document.getElementById('prevGrasas').textContent = `${totalGrasa.toFixed(1)} g`;
+
+            const pctCal = Math.min(100, Math.round((totalCal / 500) * 100));
+            document.getElementById('prevBarCalorias').style.width = `${pctCal}%`;
+
+            const alertBox = document.getElementById('prevAlertaBalance');
+            if (totalCal <= 550) {
+                alertBox.className = 'p-3 rounded-xl bg-emerald-100/70 border border-emerald-200 text-emerald-800 text-[11px] font-medium flex items-center gap-2';
+                alertBox.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-600 shrink-0"></span><span><strong>Menú balanceado:</strong> Cumple con los rangos recomendados</span>';
+            } else {
+                alertBox.className = 'p-3 rounded-xl bg-amber-100/70 border border-amber-200 text-amber-800 text-[11px] font-medium flex items-center gap-2';
+                alertBox.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-600 shrink-0"></span><span><strong>Atención:</strong> Supera el límite de calorías sugerido (500 kcal)</span>';
+            }
+        }
+
+        function renderizarPaso4Resumen() {
+            const nom = document.getElementById('wizNombreMenu').value || 'Desayuno Energético';
+            const fec = document.getElementById('wizFechaMenu').value;
+            const tipoRadio = document.querySelector('input[name="wizTipoComida"]:checked');
+            const tipo = tipoRadio ? tipoRadio.value : 'Desayuno';
+
+            document.getElementById('resumenTituloMenu').textContent = `Menú: ${nom}`;
+            document.getElementById('resumenFechaMenu').textContent = `📅 ${fec}`;
+            document.getElementById('resumenTipoComida').textContent = `🥞 ${tipo}`;
+
+            const tbody = document.getElementById('resumenTablaAlimentos');
+            tbody.innerHTML = '';
+
+            let totalCal = 0, totalProt = 0, totalCarb = 0, totalGrasa = 0;
+
+            alimentosSeleccionados.forEach(a => {
+                const factor = a.unidad === 'unid' ? a.cantidad : (a.cantidad / 100);
+                const subCal = Math.round(a.calPor100 * factor);
+                totalCal += subCal;
+                totalProt += (a.protPor100 * factor);
+                totalCarb += (a.carbPor100 * factor);
+                totalGrasa += (a.grasaPor100 * factor);
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50';
+                tr.innerHTML = `
+                    <td class="py-2.5 font-bold text-slate-800 flex items-center gap-1.5">
+                        <span>${a.icono}</span>
+                        <span>${a.nombre}</span>
+                    </td>
+                    <td class="py-2.5 text-slate-600">${a.cantidad} ${a.unidad}</td>
+                    <td class="py-2.5 text-right font-mono font-bold text-slate-700">${subCal} kcal</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('resumenTotalKcal').textContent = `${totalCal} kcal`;
+            document.getElementById('lblPaso4Calorias').textContent = `${totalCal} kcal / 500 (${Math.min(100, Math.round((totalCal / 500) * 100))}%)`;
+            document.getElementById('barPaso4Calorias').style.width = `${Math.min(100, Math.round((totalCal / 500) * 100))}%`;
+
+            document.getElementById('lblPaso4Prot').textContent = `${totalProt.toFixed(1)} g • 🟢 Excelente`;
+            document.getElementById('lblPaso4Carb').textContent = `${totalCarb.toFixed(1)} g • 🟢 Óptimo`;
+            document.getElementById('lblPaso4Grasa').textContent = `${totalGrasa.toFixed(1)} g • 🟡 Aceptable`;
+        }
+
+        async function guardarMenuFinal() {
+            const nom = document.getElementById('wizNombreMenu').value.trim();
+            const fec = document.getElementById('wizFechaMenu').value;
+            const tipoRadio = document.querySelector('input[name="wizTipoComida"]:checked');
+            const tipo = tipoRadio ? tipoRadio.value : 'Desayuno';
+            const estId = parseInt(document.getElementById('wizEstudiante').value) || null;
+
+            if (!alimentosSeleccionados.length) {
+                alert('Debes agregar al menos un alimento al menú.');
+                irAlPaso(2);
+                return;
+            }
+
+            let totalCal = 0, totalProt = 0, totalCarb = 0, totalGrasa = 0;
+            const items = alimentosSeleccionados.map(a => {
+                const factor = a.unidad === 'unid' ? a.cantidad : (a.cantidad / 100);
+                const subCal = a.calPor100 * factor;
+                const subProt = a.protPor100 * factor;
+                const subCarb = a.carbPor100 * factor;
+                const subGrasa = a.grasaPor100 * factor;
+
+                totalCal += subCal;
+                totalProt += subProt;
+                totalCarb += subCarb;
+                totalGrasa += subGrasa;
+
+                return {
+                    alimentoId: a.id,
+                    cantidad: a.cantidad,
+                    unidad: a.unidad,
+                    subtotalCalorias: subCal,
+                    subtotalProteinas: subProt,
+                    subtotalCarbohidratos: subCarb,
+                    subtotalGrasas: subGrasa
+                };
+            });
+
+            const payload = {
+                nombreMenu: nom,
+                fechaMenu: fec,
+                tipoComida: tipo,
+                estadoVariante: 'Nuevo',
+                totalCalorias: totalCal,
+                totalProteinas: totalProt,
+                totalCarbohidratos: totalCarb,
+                totalGrasas: totalGrasa,
+                semaforo: totalCal <= 500 ? 'Verde' : 'Amarillo',
+                estudianteId: estId,
+                items: items
+            };
+
+            const btn = document.getElementById('btnGuardarMenu');
+            btn.disabled = true;
+            btn.textContent = 'Guardando...';
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const editId = parseInt(urlParams.get('id')) || 0;
+            const endpoint = editId > 0 ? `/api/alimentos/menus/${editId}` : '/api/alimentos/menus';
+            const metodo = editId > 0 ? 'PUT' : 'POST';
+
+            try {
+                const res = await fetch(endpoint, {
+                    method: metodo,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    alert(editId > 0 ? '🎉 ¡Menú actualizado con éxito!' : '🎉 ¡Menú diario guardado con éxito!');
+                    window.location.href = '/Modules/03_Alimentos/Menus';
+                } else {
+                    alert('Error al guardar el menú.');
+                    btn.disabled = false;
+                    btn.textContent = '✔ Guardar Menú';
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error al conectar con el servidor.');
+                btn.disabled = false;
+                btn.textContent = '✔ Guardar Menú';
+            }
+        }
+
+        function clonarEnPaso4() {
+            const nomInput = document.getElementById('wizNombreMenu');
+            nomInput.value = `${nomInput.value} (Copia)`;
+            window.history.replaceState({}, '', '/Modules/03_Alimentos/CrearMenu');
+            irAlPaso(1);
+            alert('Nombre del menú actualizado para clonación. Puedes ajustar datos y guardar como nuevo menú.');
+        }
+
+        function sincronizarTarjetasPaso2() {
+            document.querySelectorAll('.card-item-alimento').forEach(card => {
+                const id = parseInt(card.getAttribute('data-id'));
+                const btn = card.querySelector('.btn-toggle-alim');
+                if (alimentosSeleccionados.some(a => a.id === id)) {
+                    if (btn) {
+                        btn.textContent = '✔ Añadido';
+                        btn.className = 'btn-toggle-alim px-3 py-1.5 rounded-xl bg-blue-600 text-white font-bold text-xs shrink-0 transition';
+                    }
+                    card.classList.add('border-blue-500', 'bg-blue-50/20');
+                } else {
+                    if (btn) {
+                        btn.textContent = '+ Añadir';
+                        btn.className = 'btn-toggle-alim px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-blue-600 hover:text-white text-slate-700 font-bold text-xs shrink-0 transition';
+                    }
+                    card.classList.remove('border-blue-500', 'bg-blue-50/20');
+                }
+            });
+            document.getElementById('cantAlimentosSeleccionados').textContent = alimentosSeleccionados.length;
+        }
+
+        // Inicializar estado de selección de alimentos (o cargar menú si viene ?id=X)
+        window.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const editId = parseInt(urlParams.get('id')) || 0;
+
+            if (editId > 0) {
+                try {
+                    const res = await fetch(`/api/alimentos/menus/${editId}`);
+                    if (res.ok) {
+                        const m = await res.json();
+                        document.getElementById('wizNombreMenu').value = m.nombreMenu || '';
+                        if (m.fechaMenu) {
+                            document.getElementById('wizFechaMenu').value = m.fechaMenu.substring(0, 10);
+                        }
+                        if (m.estudianteId) {
+                            document.getElementById('wizEstudiante').value = m.estudianteId;
+                        }
+                        const radio = document.querySelector(`input[name="wizTipoComida"][value="${m.tipoComida}"]`);
+                        if (radio) {
+                            radio.checked = true;
+                            seleccionarTipoComida(radio);
+                        }
+                        if (m.items && m.items.length > 0) {
+                            alimentosSeleccionados = m.items.map(it => ({
+                                id: it.alimentoId,
+                                nombre: it.alimento ? it.alimento.nombre : 'Alimento',
+                                icono: it.alimento ? it.alimento.icono : '🥗',
+                                cantidad: it.cantidad,
+                                unidad: it.unidad || 'g',
+                                calPor100: it.alimento ? it.alimento.calorias : it.subtotalCalorias,
+                                protPor100: it.alimento ? it.alimento.proteinasGramos : it.subtotalProteinas,
+                                carbPor100: it.alimento ? it.alimento.carbohidratosGramos : it.subtotalCarbohidratos,
+                                grasaPor100: it.alimento ? it.alimento.grasasGramos : it.subtotalGrasas
+                            }));
+                        }
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+            sincronizarTarjetasPaso2();
+        });
+    </script>
+}

@@ -2,45 +2,507 @@
 @model SmartNutriTracker.Web.Modules.Alimentos.IndexModel
 @{
     Layout = "/Pages/Shared/_Layout.cshtml";
-    ViewData["Title"] = "Módulo 03: Gestión de Alimentos (Equipo 3)";
+    ViewData["Title"] = "Catálogo de Alimentos - Equipo 3";
 }
 
-<div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-6">
-        <div>
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 mb-2">
-                🍎 Equipo 3 &bull; Rol: Nutricionista &bull; HU-14 a HU-17
-            </span>
-            <h1 class="text-2xl font-extrabold text-slate-900">
-                Módulo Gestión de Alimentos en construcción por el Equipo 3
-            </h1>
-            <p class="text-sm text-slate-500 mt-1">
-                CRUD de alimentos escolares, creación de menús diarios, semáforo y resumen nutricional.
-            </p>
+<div class="space-y-6">
+
+    <!-- SUB-BARRA DE NAVEGACIÓN DEL GRUPO 3 -->
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3">
+        <div class="flex items-center gap-2">
+            <a href="/Modules/03_Alimentos"
+               class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#2563eb] text-white shadow-sm transition">
+                📋 Catálogo de Alimentos
+            </a>
+            <a href="/Modules/03_Alimentos/Menus"
+               class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white text-slate-700 border border-slate-200 hover:border-blue-400 hover:text-blue-600 transition">
+                🍲 Menús Diarios
+            </a>
+            <a href="/Modules/03_Alimentos/CrearMenu"
+               class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition">
+                ✨ + Crear Menú (Wizard)
+            </a>
         </div>
-        <a href="/swagger" target="_blank" class="px-4 py-2.5 rounded-xl bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold transition shrink-0">
-            ⚡ Abrir Swagger UI
-        </a>
+        <div class="text-xs text-slate-500 font-medium">
+            Equipo 3 &bull; Gestión de Alimentos &bull; HU-14, HU-15
+        </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-            <h3 class="font-extrabold text-slate-800 text-sm">📂 Archivos de trabajo del Equipo 3</h3>
-            <p class="text-slate-600">Desarrolla todas tus clases únicamente dentro de:</p>
-            <ul class="list-disc list-inside space-y-1 font-mono text-emerald-700">
-                <li>Modules/03_Alimentos/AppDbContext.Alimentos.cs</li>
-                <li>Modules/03_Alimentos/Models/</li>
-                <li>Modules/03_Alimentos/Controllers/</li>
-                <li>Modules/03_Alimentos/Index.cshtml</li>
-            </ul>
+    <!-- ENCABEZADO Y BREADCRUMB (MOCKUP IMAGEN 1) -->
+    <div>
+        <div class="text-xs font-medium text-slate-400 mb-1">
+            Dashboard / <span class="text-slate-600 font-semibold">Catálogo de Alimentos</span>
         </div>
-        <div class="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 space-y-2">
-            <h3 class="font-extrabold text-emerald-900 text-sm">🎯 Historias de Usuario Asignadas</h3>
-            <ul class="list-disc list-inside space-y-1 text-slate-700">
-                <li><strong>HU-14:</strong> Catálogo CRUD de alimentos con calorías y macronutrientes.</li>
-                <li><strong>HU-15:</strong> Clasificación por semáforo nutricional (Verde, Amarillo, Rojo).</li>
-                <li><strong>HU-16 / HU-17:</strong> Armado de menús diarios y resumen calórico total.</li>
-            </ul>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Catálogo de Alimentos</h1>
+            <button type="button" onclick="abrirModalNuevoAlimento()"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#2563eb] hover:bg-blue-700 active:scale-95 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition shrink-0">
+                <span>+ Nuevo Alimento</span>
+            </button>
         </div>
     </div>
+
+    <!-- BUSCADOR Y FILTROS AVANZADOS -->
+    <div class="space-y-3">
+        <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 text-sm">
+                🔍
+            </span>
+            <input type="text" id="inputBuscarAlimento" oninput="filtrarAlimentos()"
+                   placeholder="Buscar alimentos por nombre, categoría..."
+                   class="w-full pl-10 pr-24 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition" />
+            <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-xs text-slate-400 pointer-events-none">
+                ⚙ Filtros Avanzados
+            </span>
+        </div>
+
+        <!-- PÍLDORAS DE CATEGORÍA (MOCKUP IMAGEN 1) -->
+        <div class="flex flex-wrap items-center gap-2 pt-1">
+            <button type="button" onclick="seleccionarFiltro(this, 'Todos')"
+                    class="filtro-pill active px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#2563eb] text-white shadow-sm transition">
+                Todos
+            </button>
+            <button type="button" onclick="seleccionarFiltro(this, 'Lácteos')"
+                    class="filtro-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:border-slate-300 transition">
+                Lácteos
+            </button>
+            <button type="button" onclick="seleccionarFiltro(this, 'Carnes')"
+                    class="filtro-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:border-slate-300 transition">
+                Carnes
+            </button>
+            <button type="button" onclick="seleccionarFiltro(this, 'Verduras')"
+                    class="filtro-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:border-slate-300 transition">
+                Verduras
+            </button>
+            <button type="button" onclick="seleccionarFiltro(this, 'Frutas')"
+                    class="filtro-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:border-slate-300 transition">
+                Frutas
+            </button>
+            <button type="button" onclick="seleccionarFiltro(this, 'Saludables')"
+                    class="filtro-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-50 transition">
+                🥗 Saludables
+            </button>
+            <button type="button" onclick="seleccionarFiltro(this, 'Favoritos')"
+                    class="filtro-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white text-amber-700 border border-amber-200 hover:bg-amber-50 transition">
+                ★ Favoritos
+            </button>
+        </div>
+    </div>
+
+    <!-- TABLA PRINCIPAL DE ALIMENTOS (MOCKUP IMAGEN 1) -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-[#1e293b] text-white uppercase tracking-wider text-[11px] font-bold">
+                        <th class="py-3.5 px-4">NOMBRE</th>
+                        <th class="py-3.5 px-4">CATEGORÍA</th>
+                        <th class="py-3.5 px-4">CALORÍAS</th>
+                        <th class="py-3.5 px-4 min-w-[140px]">PROTEÍNAS</th>
+                        <th class="py-3.5 px-4 min-w-[140px]">CARBOHIDRATOS</th>
+                        <th class="py-3.5 px-4 min-w-[140px]">GRASAS</th>
+                        <th class="py-3.5 px-4 text-center">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaAlimentosBody" class="divide-y divide-slate-100">
+                    @foreach (var alim in Model.Alimentos)
+                    {
+                        var catBg = alim.Categoria.ToLower() switch {
+                            "carnes" => "bg-red-50 text-red-700 border-red-200",
+                            "cereales" => "bg-amber-50 text-amber-700 border-amber-200",
+                            "frutas" => "bg-emerald-50 text-emerald-700 border-emerald-200",
+                            "lácteos" or "lacteos" => "bg-blue-50 text-blue-700 border-blue-200",
+                            "verduras" => "bg-green-50 text-green-700 border-green-200",
+                            _ => "bg-slate-50 text-slate-700 border-slate-200"
+                        };
+
+                        var pctProt = Math.Min(100, (int)(alim.ProteinasGramos * 3));
+                        var pctCarb = Math.Min(100, (int)(alim.CarbohidratosGramos * 2));
+                        var pctGrasa = Math.Min(100, (int)(alim.GrasasGramos * 5));
+
+                        <tr class="hover:bg-slate-50/80 transition fila-alimento"
+                            data-nombre="@alim.Nombre.ToLower()"
+                            data-categoria="@alim.Categoria.ToLower()"
+                            data-semaforo="@alim.SemaforoNutricional"
+                            data-favorito="@(alim.EsFavorito ? "true" : "false")">
+                            
+                            <!-- Nombre e Icono -->
+                            <td class="py-3 px-4 font-bold text-slate-800 flex items-center gap-2">
+                                <span class="text-base">@alim.Icono</span>
+                                <span>@alim.Nombre</span>
+                            </td>
+
+                            <!-- Categoría pill -->
+                            <td class="py-3 px-4">
+                                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold border @catBg">
+                                    @alim.Categoria
+                                </span>
+                            </td>
+
+                            <!-- Calorías -->
+                            <td class="py-3 px-4 font-semibold text-slate-700">
+                                @((int)alim.Calorias) kcal
+                            </td>
+
+                            <!-- Proteínas con barra verde -->
+                            <td class="py-3 px-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium text-slate-700 w-9">@alim.ProteinasGramos g</span>
+                                    <div class="w-20 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                        <div class="bg-emerald-500 h-1.5 rounded-full" style="width: @(pctProt)%"></div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Carbohidratos con barra azul -->
+                            <td class="py-3 px-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium text-slate-700 w-9">@alim.CarbohidratosGramos g</span>
+                                    <div class="w-20 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                        <div class="bg-blue-500 h-1.5 rounded-full" style="width: @(pctCarb)%"></div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Grasas con barra naranja/verde -->
+                            <td class="py-3 px-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium text-slate-700 w-9">@alim.GrasasGramos g</span>
+                                    <div class="w-20 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                        <div class="bg-amber-500 h-1.5 rounded-full" style="width: @(pctGrasa)%"></div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Acciones (Editar, Eliminar, Favorito) -->
+                            <td class="py-3 px-4 text-center">
+                                <div class="inline-flex items-center justify-center gap-1.5 text-slate-400">
+                                    <button type="button" onclick="editarAlimento(@alim.Id)" title="Editar alimento"
+                                            class="hover:text-blue-600 transition p-1">
+                                        ✏️
+                                    </button>
+                                    <button type="button" onclick="eliminarAlimento(@alim.Id, '@alim.Nombre')" title="Eliminar alimento"
+                                            class="hover:text-red-600 transition p-1">
+                                        🗑️
+                                    </button>
+                                    <button type="button" onclick="toggleFavorito(@alim.Id, this)" title="Marcar como favorito"
+                                            class="hover:text-amber-500 transition p-1 @(alim.EsFavorito ? "text-amber-500 font-bold" : "text-slate-300")">
+                                        ★
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pie de Tabla: Paginación y Contador -->
+        <div class="p-3.5 bg-slate-50/70 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs text-slate-500 gap-2">
+            <div>
+                Mostrando <span id="lblMostrando">1-@Model.Alimentos.Count</span> de <span id="lblTotal">@Model.TotalAlimentos</span> alimentos
+            </div>
+            <div class="flex items-center gap-1">
+                <button type="button" class="w-7 h-7 rounded-lg border border-slate-200 bg-white text-slate-600 flex items-center justify-center hover:bg-slate-100 disabled:opacity-50">‹</button>
+                <button type="button" class="w-7 h-7 rounded-lg bg-[#2563eb] text-white font-bold flex items-center justify-center">1</button>
+                <button type="button" class="w-7 h-7 rounded-lg border border-slate-200 bg-white text-slate-600 flex items-center justify-center hover:bg-slate-100">2</button>
+                <button type="button" class="w-7 h-7 rounded-lg border border-slate-200 bg-white text-slate-600 flex items-center justify-center hover:bg-slate-100">3</button>
+                <button type="button" class="w-7 h-7 rounded-lg border border-slate-200 bg-white text-slate-600 flex items-center justify-center hover:bg-slate-100">›</button>
+            </div>
+            <div class="font-medium">
+                @Model.TotalAlimentos alimentos registrados
+            </div>
+        </div>
+    </div>
+
 </div>
+
+<!-- MODAL: REGISTRAR / EDITAR NUEVO ALIMENTO (MOCKUP IMAGEN 2) -->
+<div id="modalAlimento" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 p-6 sm:p-8 relative animate-in fade-in zoom-in-95 duration-150">
+        
+        <!-- Botón Cerrar (X) -->
+        <button type="button" onclick="cerrarModalAlimento()"
+                class="absolute top-6 right-6 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center text-sm font-bold transition">
+            ✕
+        </button>
+
+        <div class="mb-5">
+            <h2 id="modalTitulo" class="text-xl font-extrabold text-slate-900">Registrar Nuevo Alimento</h2>
+            <p class="text-xs text-slate-500 mt-1">Ingresa la información nutricional por 100g</p>
+        </div>
+
+        <form id="formAlimento" onsubmit="guardarAlimento(event)" class="space-y-4 text-xs">
+            <input type="hidden" id="alimId" value="0" />
+
+            <!-- Fila 1: Nombre y Calorías -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Nombre del alimento *</label>
+                    <input type="text" id="alimNombre" required placeholder="Ej. Pechuga de pollo"
+                           class="w-full px-3 py-2 rounded-xl border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Calorías (por 100g) * ⓘ</label>
+                    <div class="relative">
+                        <input type="number" step="0.1" id="alimCalorias" required placeholder="0"
+                               class="w-full px-3 py-2 pr-12 rounded-xl border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 font-medium">kcal</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fila 2: Categoría y Proteínas -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Categoría * ⓘ</label>
+                    <select id="alimCategoria" required
+                            class="w-full px-3 py-2 rounded-xl border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Selecciona categoría</option>
+                        <option value="Carnes">Carnes / Proteínas</option>
+                        <option value="Cereales">Cereales y Tubérculos</option>
+                        <option value="Frutas">Frutas</option>
+                        <option value="Verduras">Verduras</option>
+                        <option value="Lácteos">Lácteos</option>
+                        <option value="Saludables">Grasas Saludables / Frutos Secos</option>
+                        <option value="Snacks">Snacks / Refrigerios</option>
+                        <option value="Bebidas">Bebidas</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Proteínas (g) * ⓘ</label>
+                    <div class="relative">
+                        <input type="number" step="0.1" id="alimProteinas" required placeholder="0.0"
+                               class="w-full px-3 py-2 pr-9 rounded-xl border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 font-medium">g</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fila 3: Porción sugerida y Carbohidratos -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Porción sugerida ⓘ</label>
+                    <div class="flex gap-2">
+                        <input type="number" id="alimPorcionGramos" value="100"
+                               class="w-2/3 px-3 py-2 rounded-xl border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <select id="alimUnidad" class="w-1/3 px-2 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-700">
+                            <option value="g">g ▾</option>
+                            <option value="unid">unid</option>
+                            <option value="ml">ml</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Carbohidratos (g) * ⓘ</label>
+                    <div class="relative">
+                        <input type="number" step="0.1" id="alimCarbohidratos" required placeholder="0.0"
+                               class="w-full px-3 py-2 pr-9 rounded-xl border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 font-medium">g</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fila 4: Grasas -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Semáforo Nutricional</label>
+                    <select id="alimSemaforo" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-slate-800">
+                        <option value="Verde">🟢 Verde (Saludable)</option>
+                        <option value="Amarillo">🟡 Amarillo (Moderado)</option>
+                        <option value="Rojo">🔴 Rojo (Restringido)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Grasas (g) * ⓘ</label>
+                    <div class="relative">
+                        <input type="number" step="0.1" id="alimGrasas" required placeholder="0.0"
+                               class="w-full px-3 py-2 pr-9 rounded-xl border border-slate-200 text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 font-medium">g</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Separador -->
+            <div class="border-t border-slate-100 pt-4 flex items-center justify-between">
+                <span class="text-[11px] text-slate-400">* Campos obligatorios</span>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="cerrarModalAlimento()"
+                            class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold transition">
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                            class="px-5 py-2.5 rounded-xl bg-[#2563eb] hover:bg-blue-700 text-white font-bold shadow-md shadow-blue-500/20 transition flex items-center gap-1.5">
+                        <span>✔ Guardar Alimento</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- TOAST DE ÉXITO (DIAGRAMA DE FLUJO IMAGEN 10) -->
+<div id="toastExito" class="fixed bottom-6 right-6 z-50 bg-emerald-600 text-white px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 text-xs font-bold hidden animate-in slide-in-from-bottom duration-200">
+    <span>✔</span>
+    <span id="toastMensaje">Alimento guardado con éxito</span>
+</div>
+
+@section Scripts {
+    <script>
+        let categoriaFiltroActual = 'Todos';
+
+        function seleccionarFiltro(btn, categoria) {
+            document.querySelectorAll('.filtro-pill').forEach(b => {
+                b.classList.remove('active', 'bg-[#2563eb]', 'text-white');
+                b.classList.add('bg-white');
+            });
+            btn.classList.add('active', 'bg-[#2563eb]', 'text-white');
+            btn.classList.remove('bg-white');
+
+            categoriaFiltroActual = categoria;
+            filtrarAlimentos();
+        }
+
+        function filtrarAlimentos() {
+            const busqueda = document.getElementById('inputBuscarAlimento').value.trim().toLowerCase();
+            const filas = document.querySelectorAll('.fila-alimento');
+            let visibles = 0;
+
+            filas.forEach(fila => {
+                const nombre = fila.getAttribute('data-nombre');
+                const cat = fila.getAttribute('data-categoria');
+                const semaforo = fila.getAttribute('data-semaforo');
+                const favorito = fila.getAttribute('data-favorito') === 'true';
+
+                let cumpleCat = false;
+                if (categoriaFiltroActual === 'Todos') cumpleCat = true;
+                else if (categoriaFiltroActual === 'Saludables') cumpleCat = (semaforo === 'Verde');
+                else if (categoriaFiltroActual === 'Favoritos') cumpleCat = favorito;
+                else cumpleCat = (cat === categoriaFiltroActual.toLowerCase());
+
+                const cumpleBusqueda = !busqueda || nombre.includes(busqueda) || cat.includes(busqueda);
+
+                if (cumpleCat && cumpleBusqueda) {
+                    fila.style.display = '';
+                    visibles++;
+                } else {
+                    fila.style.display = 'none';
+                }
+            });
+
+            document.getElementById('lblMostrando').textContent = `1-${visibles}`;
+        }
+
+        function abrirModalNuevoAlimento() {
+            document.getElementById('formAlimento').reset();
+            document.getElementById('alimId').value = "0";
+            document.getElementById('modalTitulo').textContent = "Registrar Nuevo Alimento";
+            document.getElementById('modalAlimento').classList.remove('hidden');
+        }
+
+        function cerrarModalAlimento() {
+            document.getElementById('modalAlimento').classList.add('hidden');
+        }
+
+        async function guardarAlimento(e) {
+            e.preventDefault();
+            const id = parseInt(document.getElementById('alimId').value);
+            const payload = {
+                id: id,
+                nombre: document.getElementById('alimNombre').value.trim(),
+                categoria: document.getElementById('alimCategoria').value,
+                calorias: parseFloat(document.getElementById('alimCalorias').value) || 0,
+                proteinasGramos: parseFloat(document.getElementById('alimProteinas').value) || 0,
+                carbohidratosGramos: parseFloat(document.getElementById('alimCarbohidratos').value) || 0,
+                grasasGramos: parseFloat(document.getElementById('alimGrasas').value) || 0,
+                gramosPorcion: parseFloat(document.getElementById('alimPorcionGramos').value) || 100,
+                porcionReferencia: `${document.getElementById('alimPorcionGramos').value} ${document.getElementById('alimUnidad').value}`,
+                semaforoNutricional: document.getElementById('alimSemaforo').value
+            };
+
+            const url = id === 0 ? '/api/alimentos' : `/api/alimentos/${id}`;
+            const method = id === 0 ? 'POST' : 'PUT';
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    cerrarModalAlimento();
+                    mostrarToast(id === 0 ? "¡Alimento registrado exitosamente!" : "¡Alimento actualizado!");
+                    setTimeout(() => location.reload(), 900);
+                } else {
+                    alert('Error al guardar el alimento. Verifica los datos ingresados.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('No se pudo conectar con la API.');
+            }
+        }
+
+        async function editarAlimento(id) {
+            try {
+                const res = await fetch(`/api/alimentos/${id}`);
+                if (!res.ok) return;
+                const data = await res.json();
+
+                document.getElementById('alimId').value = data.id;
+                document.getElementById('alimNombre').value = data.nombre;
+                document.getElementById('alimCategoria').value = data.categoria;
+                document.getElementById('alimCalorias').value = data.calorias;
+                document.getElementById('alimProteinas').value = data.proteinasGramos;
+                document.getElementById('alimCarbohidratos').value = data.carbohidratosGramos;
+                document.getElementById('alimGrasas').value = data.grasasGramos;
+                document.getElementById('alimPorcionGramos').value = data.gramosPorcion;
+                document.getElementById('alimSemaforo').value = data.semaforoNutricional;
+
+                document.getElementById('modalTitulo').textContent = "Editar Alimento";
+                document.getElementById('modalAlimento').classList.remove('hidden');
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function eliminarAlimento(id, nombre) {
+            if (!confirm(`¿Estás seguro de eliminar "${nombre}" del catálogo?`)) return;
+            try {
+                const res = await fetch(`/api/alimentos/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    mostrarToast("Alimento eliminado");
+                    setTimeout(() => location.reload(), 800);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function toggleFavorito(id, btn) {
+            try {
+                const res = await fetch(`/api/alimentos/${id}/favorito`, { method: 'POST' });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.esFavorito) {
+                        btn.classList.add('text-amber-500', 'font-bold');
+                        btn.classList.remove('text-slate-300');
+                    } else {
+                        btn.classList.remove('text-amber-500', 'font-bold');
+                        btn.classList.add('text-slate-300');
+                    }
+                    mostrarToast(data.esFavorito ? "Añadido a favoritos ★" : "Quitado de favoritos");
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function mostrarToast(msg) {
+            const toast = document.getElementById('toastExito');
+            document.getElementById('toastMensaje').textContent = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 2500);
+        }
+    </script>
+}

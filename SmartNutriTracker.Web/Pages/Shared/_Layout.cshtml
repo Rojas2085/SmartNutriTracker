@@ -88,11 +88,26 @@
 
                 @if (User.IsInRole("Nutricionista") || User.IsInRole("Admin"))
                 {
-                    <a href="/Modules/03_Alimentos"
-                       class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition @(rutaActual.Contains("03_Alimentos") ? "bg-[#059669] text-white" : "text-slate-700 hover:bg-slate-100")">
-                        <span>🍎</span>
-                        <span>03. Alimentos (Equipo 3)</span>
-                    </a>
+                    <div class="space-y-1">
+                        <a href="/Modules/03_Alimentos"
+                           class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition @(rutaActual.Contains("03_Alimentos") && !rutaActual.Contains("Menus") && !rutaActual.Contains("CrearMenu") ? "bg-[#059669] text-white" : "text-slate-700 hover:bg-slate-100")">
+                            <span>🍎</span>
+                            <span>03. Alimentos (Catálogo)</span>
+                        </a>
+                        @if (rutaActual.Contains("03_Alimentos"))
+                        {
+                            <div class="pl-7 space-y-1">
+                                <a href="/Modules/03_Alimentos/Menus"
+                                   class="block px-2.5 py-1 rounded-lg text-[11px] font-medium transition @(rutaActual.Contains("Menus") ? "text-emerald-700 bg-emerald-50 font-bold" : "text-slate-500 hover:text-slate-900")">
+                                    🍲 Menús Diarios
+                                </a>
+                                <a href="/Modules/03_Alimentos/CrearMenu"
+                                   class="block px-2.5 py-1 rounded-lg text-[11px] font-medium transition @(rutaActual.Contains("CrearMenu") ? "text-emerald-700 bg-emerald-50 font-bold" : "text-slate-500 hover:text-slate-900")">
+                                    ✨ + Crear Menú (Wizard)
+                                </a>
+                            </div>
+                        }
+                    </div>
                 }
 
                 @if (User.IsInRole("Estudiante") || User.IsInRole("Admin"))
