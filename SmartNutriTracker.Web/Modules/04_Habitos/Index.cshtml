@@ -3,44 +3,149 @@
 @{
     Layout = "/Pages/Shared/_Layout.cshtml";
     ViewData["Title"] = "Módulo 04: Registro de Hábitos (Equipo 4)";
+    var inputClase = "w-full px-3 py-2 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]";
+    var btnClase = "px-4 py-2.5 rounded-xl bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold transition";
 }
 
 <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-6">
         <div>
             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-teal-100 text-teal-800 mb-2">
-                🏃 Equipo 4 &bull; Rol: Estudiante &bull; HU-19 a HU-22
+                🏃 Equipo 4 &bull; HU-19 a HU-22
             </span>
-            <h1 class="text-2xl font-extrabold text-slate-900">
-                Módulo Registro de Hábitos en construcción por el Equipo 4
-            </h1>
+            <h1 class="text-2xl font-extrabold text-slate-900">Registro de hábitos</h1>
             <p class="text-sm text-slate-500 mt-1">
-                Registro de consumo alimenticio real, vasos de agua, horas de sueño, actividad física e historial.
+                Registra lo que comiste, tu agua, tus horas de sueño y tu actividad física. Revisa tu historial de los últimos 30 días.
             </p>
         </div>
-        <a href="/swagger" target="_blank" class="px-4 py-2.5 rounded-xl bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold transition shrink-0">
-            ⚡ Abrir Swagger UI
-        </a>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-            <h3 class="font-extrabold text-slate-800 text-sm">📂 Archivos de trabajo del Equipo 4</h3>
-            <p class="text-slate-600">Desarrolla todas tus clases únicamente dentro de:</p>
-            <ul class="list-disc list-inside space-y-1 font-mono text-emerald-700">
-                <li>Modules/04_Habitos/AppDbContext.Habitos.cs</li>
-                <li>Modules/04_Habitos/Models/</li>
-                <li>Modules/04_Habitos/Controllers/</li>
-                <li>Modules/04_Habitos/Index.cshtml</li>
-            </ul>
+    @if (!string.IsNullOrEmpty(Model.Mensaje))
+    {
+        <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-sm text-emerald-900">@Model.Mensaje</div>
+    }
+    @if (!string.IsNullOrEmpty(Model.Error))
+    {
+        <div class="p-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-800" role="alert">@Model.Error</div>
+    }
+
+    <!-- HU-20 / HU-21 / HU-22: hábitos diarios (crear o editar) -->
+    <section class="p-6 rounded-2xl border border-slate-200 space-y-4">
+        <h2 class="font-extrabold text-slate-900">
+            @(Model.Habito.Id == 0 ? "Hábitos del día" : "Editar registro")
+        </h2>
+        <form method="post" asp-page-handler="Habito" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input type="hidden" asp-for="Habito.Id" />
+            <label class="text-xs font-bold text-slate-700">Fecha
+                <input asp-for="Habito.Fecha" type="date" class="@inputClase mt-1" />
+            </label>
+            <label class="text-xs font-bold text-slate-700">Agua (ml)
+                <input asp-for="Habito.AguaMl" type="number" min="0" max="10000" class="@inputClase mt-1" />
+            </label>
+            <label class="text-xs font-bold text-slate-700">Horas de sueño
+                <input asp-for="Habito.HorasSueno" type="number" step="0.5" min="0" max="24" class="@inputClase mt-1" />
+            </label>
+            <label class="text-xs font-bold text-slate-700">Actividad física (min)
+                <input asp-for="Habito.ActividadMin" type="number" min="0" max="1440" class="@inputClase mt-1" />
+            </label>
+            <label class="text-xs font-bold text-slate-700 md:col-span-2">Nota (opcional)
+                <input asp-for="Habito.Nota" type="text" maxlength="250" class="@inputClase mt-1" />
+            </label>
+            <div class="md:col-span-2 flex gap-3">
+                <button type="submit" class="@btnClase">@(Model.Habito.Id == 0 ? "Guardar hábitos" : "Guardar cambios")</button>
+                @if (Model.Habito.Id != 0)
+                {
+                    <a href="/Modules/04_Habitos" class="px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50">Cancelar</a>
+                }
+            </div>
+        </form>
+    </section>
+
+    <!-- HU-19: consumo real de alimentos -->
+    <section class="p-6 rounded-2xl border border-slate-200 space-y-4">
+        <h2 class="font-extrabold text-slate-900">Lo que comiste</h2>
+        <form method="post" asp-page-handler="Comida" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <label class="text-xs font-bold text-slate-700">Comida
+                <select asp-for="Comida.TipoComida" class="@inputClase mt-1">
+                    @foreach (var tipo in Model.TiposComida)
+                    {
+                        <option value="@tipo">@tipo</option>
+                    }
+                </select>
+            </label>
+            <label class="text-xs font-bold text-slate-700 md:col-span-2">Qué comiste
+                <input asp-for="Comida.Descripcion" type="text" maxlength="300" placeholder="Ej.: arroz integral 1 taza y pollo 150 g" class="@inputClase mt-1" />
+            </label>
+            <label class="text-xs font-bold text-slate-700">Kcal estimadas (opcional)
+                <input asp-for="Comida.Kcal" type="number" step="0.1" min="0" max="5000" class="@inputClase mt-1" />
+            </label>
+            <div class="md:col-span-4">
+                <button type="submit" class="@btnClase">Registrar comida</button>
+            </div>
+        </form>
+
+        <div>
+            <h3 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider mb-2">Comidas de hoy</h3>
+            @if (Model.ComidasHoy.Count == 0)
+            {
+                <p class="text-sm text-slate-500">Aún no registras comidas hoy.</p>
+            }
+            else
+            {
+                <ul class="space-y-2">
+                    @foreach (var c in Model.ComidasHoy)
+                    {
+                        <li class="text-sm text-slate-700">
+                            <strong>@c.TipoComida</strong> · @c.FechaHora.ToString("HH:mm") — @c.Descripcion
+                            @if (c.Kcal is not null)
+                            {
+                                <span class="text-slate-500">(@c.Kcal.Value.ToString("0") kcal)</span>
+                            }
+                        </li>
+                    }
+                </ul>
+            }
         </div>
-        <div class="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 space-y-2">
-            <h3 class="font-extrabold text-emerald-900 text-sm">🎯 Historias de Usuario Asignadas</h3>
-            <ul class="list-disc list-inside space-y-1 text-slate-700">
-                <li><strong>HU-19:</strong> Registro diario de alimentos consumidos por el estudiante.</li>
-                <li><strong>HU-20 / HU-21:</strong> Control de vasos de agua, sueño y actividad física.</li>
-                <li><strong>HU-22:</strong> Historial semanal de cumplimiento de hábitos saludables.</li>
-            </ul>
-        </div>
-    </div>
+    </section>
+
+    <!-- HU-22: historial de los últimos 30 días -->
+    <section class="p-6 rounded-2xl border border-slate-200 space-y-4">
+        <h2 class="font-extrabold text-slate-900">Historial (últimos 30 días)</h2>
+        @if (Model.Historial.Count == 0)
+        {
+            <p class="text-sm text-slate-500">Todavía no tienes registros de hábitos.</p>
+        }
+        else
+        {
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="text-left text-xs text-slate-500 border-b">
+                        <tr>
+                            <th class="py-2 pr-4">Fecha</th>
+                            <th class="py-2 pr-4">Agua (ml)</th>
+                            <th class="py-2 pr-4">Sueño (h)</th>
+                            <th class="py-2 pr-4">Actividad (min)</th>
+                            <th class="py-2 pr-4">Nota</th>
+                            <th class="py-2"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var r in Model.Historial)
+                        {
+                            <tr class="border-b border-slate-100">
+                                <td class="py-2 pr-4">@r.Fecha.ToString("dd/MM/yyyy")</td>
+                                <td class="py-2 pr-4">@r.AguaMl</td>
+                                <td class="py-2 pr-4">@(r.HorasSueno?.ToString("0.#") ?? "-")</td>
+                                <td class="py-2 pr-4">@r.ActividadMin</td>
+                                <td class="py-2 pr-4">@r.Nota</td>
+                                <td class="py-2">
+                                    <a href="?Editar=@r.Id" class="text-xs font-bold text-[#059669] hover:underline">Editar</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
 </div>
