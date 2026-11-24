@@ -176,7 +176,7 @@ public class IndexModel : PageModel
             nuevoUsuario.Email, nuevoUsuario.Rol, adminEmail);
 
         TempData["MensajeExito"] = $"¡Usuario '{nuevoUsuario.NombreCompleto}' ({nuevoUsuario.Email}) creado exitosamente con el rol '{nuevoUsuario.Rol}'!";
-        return RedirectToPage("/Modules/01_Autenticacion", new { nuevo = false });
+        return RedirectToPage(new { nuevo = false });
     }
 
     /// <summary>
@@ -188,7 +188,7 @@ public class IndexModel : PageModel
         if (usuario == null)
         {
             TempData["MensajeError"] = "El usuario seleccionado no existe.";
-            return RedirectToPage("/Modules/01_Autenticacion");
+            return RedirectToPage();
         }
 
         // Prevenir que el admin se desactive a sí mismo
@@ -196,7 +196,7 @@ public class IndexModel : PageModel
         if (usuario.Email.ToLowerInvariant() == currentEmail)
         {
             TempData["MensajeError"] = "No puedes desactivar tu propia cuenta de administrador activa.";
-            return RedirectToPage("/Modules/01_Autenticacion");
+            return RedirectToPage();
         }
 
         usuario.Activo = !usuario.Activo;
@@ -216,7 +216,7 @@ public class IndexModel : PageModel
         await _context.SaveChangesAsync();
 
         TempData["MensajeExito"] = $"Estado de la cuenta '{usuario.NombreCompleto}' actualizado a: {(usuario.Activo ? "Activo" : "Inactivo")}.";
-        return RedirectToPage("/Modules/01_Autenticacion");
+        return RedirectToPage();
     }
 
     private async Task CargarDatosAsync()
