@@ -145,4 +145,108 @@ public class AuthApiController : ControllerBase
 
         return Ok(logs);
     }
+
+    /// <summary>
+    /// Registra un nuevo usuario en el sistema con su rol correspondiente (HU-01, HU-04). Requiere token JWT de Administrador.
+    /// </summary>
+    [HttpPost("usuarios")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+    [ProducesResponseType(typeof(CrearUsuarioResponseDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(CrearUsuarioResponseDto), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CrearUsuario([FromBody] CrearUsuarioRequestDto request)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errores = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+            return BadRequest(new CrearUsuarioResponseDto { Exito = false, Mensaje = errores });
+        }
+
+        var rolesPermitidos = new[] { "Admin", "Docente", "Nutricionista", "Estudiante" };
+        var rolValido = rolesPermitidos.FirstOrDefault(r => r.Equals(request.Rol?.Trim(), StringComparison.OrdinalIgnoreCase));
+        if (rolValido == null)
+        {
+            return BadRequest(new CrearUsuarioResponseDto
+            {
+                Exito = false,
+                Mensaje = $"Rol inválido '{request.Rol}'. Los roles válidos son: {string.Join(", ", rolesPermitidos)}"
+            });
+        }
+
+        var emailNormalizado = request.Email.Trim().ToLowerInvariant();
+        var yaExiste = await _context.Usuarios.AnyAsync(u => u.Email.ToLower() == emailNormalizado);
+        if (yaExiste)
+        {
+            return BadRequest(new CrearUsuarioResponseDto
+            {
+                Exito = false,
+                Mensaje = $"El correo '{request.Email}' ya se encuentra registrado en el sistema."
+            });
+        }
+
+        var nuevoUsuario = new SmartNutriTracker.Web.Core.Models.Usuario
+        {
+            NombreCompleto = request.NombreCompleto.Trim(),
+            Email = emailNormalizado,
+            PasswordHash = DbInitializer.HashPassword(request.Password),
+            Rol = rolValido,
+            EquipoAsignado = string.IsNullOrWhiteSpace(request.EquipoAsignado) ? "General / Innovare" : request.EquipoAsignado.Trim(),
+            Activo = request.Activo,
+            FechaCreacion = DateTime.UtcNow
+        };
+
+        _context.Usuarios.Add(nuevoUsuario);
+        await _context.SaveChangesAsync();
+
+        // Si es Estudiante, inicializamos su ficha en PerfilesEstudiantes
+        if (rolValido == "Estudiante")
+        {
+            var perfilExiste = await _context.PerfilesEstudiantes.AnyAsync(p => p.UsuarioId == nuevoUsuario.Id);
+            if (!perfilExiste)
+            {
+                _context.PerfilesEstudiantes.Add(new SmartNutriTracker.Web.Modules.PerfilReportes.Models.PerfilEstudiante
+                {
+                    UsuarioId = nuevoUsuario.Id,
+                    CodigoEstudiante = $"EST-{DateTime.Now.Year}-{nuevoUsuario.Id:D3}",
+                    GradoSeccion = "Por Asignar",
+                    FechaNacimiento = DateTime.Today.AddYears(-15),
+                    Sexo = "M",
+                    PesoKg = 50.0m,
+                    TallaCm = 160.0m,
+                    Imc = 19.53m,
+                    ClasificacionImc = "Normal",
+                    ObjetivoNutricional = "Mantener",
+                    FechaRegistro = DateTime.UtcNow
+                });
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        // Auditoría del registro
+        var adminEmail = User.FindFirstValue(ClaimTypes.Email) ?? "admin@innovare.edu.bo";
+        _context.AuditoriasAcceso.Add(new AuditoriaAcceso
+        {
+            Email = nuevoUsuario.Email,
+            Rol = nuevoUsuario.Rol,
+            EquipoAsignado = nuevoUsuario.EquipoAsignado,
+            Exitoso = true,
+            Origen = "API REST Admin (POST /api/auth/usuarios)",
+            Detalle = $"Usuario '{nuevoUsuario.NombreCompleto}' creado por Admin '{adminEmail}'",
+            FechaHora = DateTime.Now
+        });
+        await _context.SaveChangesAsync();
+
+        return StatusCode(StatusCodes.Status201Created, new CrearUsuarioResponseDto
+        {
+            Exito = true,
+            Mensaje = $"Usuario '{nuevoUsuario.NombreCompleto}' creado exitosamente con rol {nuevoUsuario.Rol}.",
+            Usuario = new UsuarioInfoDto
+            {
+                Id = nuevoUsuario.Id,
+                NombreCompleto = nuevoUsuario.NombreCompleto,
+                Email = nuevoUsuario.Email,
+                Rol = nuevoUsuario.Rol,
+                EquipoAsignado = nuevoUsuario.EquipoAsignado
+            }
+        });
+    }
 }

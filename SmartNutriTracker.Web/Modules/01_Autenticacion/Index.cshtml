@@ -2,51 +2,179 @@
 @model SmartNutriTracker.Web.Modules.Autenticacion.IndexModel
 @{
     Layout = "/Pages/Shared/_Layout.cshtml";
-    ViewData["Title"] = "Módulo 01: Autenticación y Seguridad (Equipo 1)";
+    ViewData["Title"] = "Módulo 01: Administración de Usuarios y Seguridad (Equipo 1)";
 }
 
 <div class="space-y-6">
-    <!-- Encabezado del Módulo 01 -->
-    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+    <!-- ENCABEZADO PRINCIPAL Y ACCIÓN DE CREAR USUARIO -->
+    <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div>
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 mb-2">
-                🛡️ Equipo 1 &bull; HU-01 a HU-05
-            </span>
-            <h1 class="text-2xl font-extrabold text-slate-900">Módulo 01: Autenticación, Roles y Auditoría</h1>
-            <p class="text-sm text-slate-500 mt-1">
-                Carpeta aislada de trabajo: <code class="bg-slate-100 px-2 py-0.5 rounded text-emerald-700 font-semibold">Modules/01_Autenticacion/</code>
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 mb-2">
+                🛡️ Equipo 1 &bull; HU-01, HU-04 y HU-05
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                Panel de Administración de Usuarios
+            </h1>
+            <p class="text-sm text-slate-500 mt-1 max-w-2xl">
+                Crea nuevos usuarios, administra credenciales institucionales, asigna roles del sistema y monitorea la bitácora de auditoría en tiempo real.
             </p>
         </div>
-        <a href="/swagger" target="_blank" class="px-4 py-2.5 rounded-xl bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold transition shrink-0">
-            ⚡ Probar /api/auth en Swagger
-        </a>
+
+        <div class="flex flex-wrap items-center gap-3 shrink-0">
+            <button type="button" onclick="abrirModalUsuario()"
+                    class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#059669] hover:bg-[#047857] text-white text-sm font-bold shadow-md hover:shadow-lg transition transform active:scale-95 cursor-pointer">
+                <span>➕</span>
+                <span>Nuevo Usuario</span>
+            </button>
+            <a href="/swagger" target="_blank"
+               class="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
+                <span>⚡ API en Swagger</span>
+            </a>
+        </div>
     </div>
 
-    <!-- Tabla de Usuarios y Roles (HU-01, HU-04) -->
-    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-        <h2 class="text-base font-extrabold text-slate-900 mb-4">👥 Usuarios y Roles Semilla del Sistema (HU-01 / HU-04)</h2>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-xs">
+    <!-- MENSAJES DE ALERTA -->
+    @if (!string.IsNullOrEmpty(Model.MensajeExito))
+    {
+        <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-sm text-emerald-900 flex items-center justify-between shadow-sm animate-fade-in">
+            <div class="flex items-center gap-3">
+                <span class="text-xl">✅</span>
+                <span class="font-semibold">@Model.MensajeExito</span>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-700 hover:text-emerald-900 text-lg font-bold px-2">&times;</button>
+        </div>
+    }
+    @if (!string.IsNullOrEmpty(Model.MensajeError))
+    {
+        <div class="p-4 rounded-2xl bg-red-50 border border-red-200 text-sm text-red-900 flex items-center justify-between shadow-sm animate-fade-in">
+            <div class="flex items-center gap-3">
+                <span class="text-xl">⚠️</span>
+                <span class="font-semibold">@Model.MensajeError</span>
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" class="text-red-700 hover:text-red-900 text-lg font-bold px-2">&times;</button>
+        </div>
+    }
+
+    <!-- MÉTRICAS Y RESUMEN RÁPIDO DE USUARIOS -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Total Usuarios</span>
+            <span class="text-2xl font-black text-slate-900 mt-1 block">@Model.TotalUsuarios</span>
+            <span class="text-[11px] text-slate-500">Registrados</span>
+        </div>
+        <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+            <span class="text-xs font-bold text-teal-600 uppercase tracking-wider block">Estudiantes</span>
+            <span class="text-2xl font-black text-teal-700 mt-1 block">@Model.TotalEstudiantes</span>
+            <span class="text-[11px] text-teal-600">Rol Estudiante</span>
+        </div>
+        <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+            <span class="text-xs font-bold text-blue-600 uppercase tracking-wider block">Docentes</span>
+            <span class="text-2xl font-black text-blue-700 mt-1 block">@Model.TotalDocentes</span>
+            <span class="text-[11px] text-blue-600">Rol Docente</span>
+        </div>
+        <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+            <span class="text-xs font-bold text-amber-600 uppercase tracking-wider block">Nutricionistas</span>
+            <span class="text-2xl font-black text-amber-700 mt-1 block">@Model.TotalNutricionistas</span>
+            <span class="text-[11px] text-amber-600">Rol Nutri</span>
+        </div>
+        <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm col-span-2 sm:col-span-1">
+            <span class="text-xs font-bold text-purple-600 uppercase tracking-wider block">Administradores</span>
+            <span class="text-2xl font-black text-purple-700 mt-1 block">@Model.TotalAdmins</span>
+            <span class="text-[11px] text-purple-600">Rol Admin</span>
+        </div>
+    </div>
+
+    <!-- TABLA PRINCIPAL DE USUARIOS DEL SISTEMA -->
+    <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h2 class="text-lg font-extrabold text-slate-900">
+                    👥 Directorio de Usuarios Registrados (@Model.Usuarios.Count)
+                </h2>
+                <p class="text-xs text-slate-500">
+                    Lista general de cuentas con acceso a los módulos de SmartNutriTracker.
+                </p>
+            </div>
+
+            <!-- FILTRO / BÚSQUEDA RÁPIDA -->
+            <div class="flex items-center gap-2">
+                <input type="text" id="buscadorUsuarios" onkeyup="filtrarUsuarios()"
+                       placeholder="Buscar por nombre, correo o rol..."
+                       class="px-4 py-2 rounded-xl border border-slate-200 text-xs w-64 focus:outline-none focus:ring-2 focus:ring-[#059669]" />
+            </div>
+        </div>
+
+        <div class="overflow-x-auto rounded-2xl border border-slate-100">
+            <table class="w-full text-left border-collapse text-xs" id="tablaUsuarios">
                 <thead>
-                    <tr class="border-b border-slate-200 text-slate-500 uppercase">
-                        <th class="py-2.5 px-3">ID</th>
-                        <th class="py-2.5 px-3">Nombre Completo</th>
-                        <th class="py-2.5 px-3">Correo Institucional</th>
-                        <th class="py-2.5 px-3">Rol</th>
-                        <th class="py-2.5 px-3">Equipo Asignado</th>
+                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase font-bold text-[11px]">
+                        <th class="py-3 px-4">Usuario</th>
+                        <th class="py-3 px-4">Correo Institucional</th>
+                        <th class="py-3 px-4">Rol del Sistema</th>
+                        <th class="py-3 px-4">Equipo / Área</th>
+                        <th class="py-3 px-4">Estado</th>
+                        <th class="py-3 px-4 text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @foreach (var u in Model.Usuarios)
                     {
-                        <tr class="hover:bg-slate-50">
-                            <td class="py-2.5 px-3 font-bold text-slate-700">#@u.Id</td>
-                            <td class="py-2.5 px-3 font-semibold text-slate-900">@u.NombreCompleto</td>
-                            <td class="py-2.5 px-3 font-mono text-emerald-700">@u.Email</td>
-                            <td class="py-2.5 px-3">
-                                <span class="px-2.5 py-0.5 rounded-full font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">@u.Rol</span>
+                        var iniciales = string.Join("", u.NombreCompleto.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(s => s[0])).ToUpper();
+                        var rolBadgeClass = u.Rol switch
+                        {
+                            "Admin" => "bg-purple-100 text-purple-800 border-purple-200",
+                            "Docente" => "bg-blue-100 text-blue-800 border-blue-200",
+                            "Nutricionista" => "bg-amber-100 text-amber-800 border-amber-200",
+                            _ => "bg-teal-100 text-teal-800 border-teal-200"
+                        };
+
+                        <tr class="hover:bg-slate-50/80 transition fila-usuario">
+                            <td class="py-3 px-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-700 text-xs shrink-0">
+                                        @iniciales
+                                    </div>
+                                    <div>
+                                        <p class="font-extrabold text-slate-900 nombre-col">@u.NombreCompleto</p>
+                                        <span class="text-[10px] text-slate-400">ID: #@u.Id &bull; @u.FechaCreacion.ToString("dd/MM/yyyy")</span>
+                                    </div>
+                                </div>
                             </td>
-                            <td class="py-2.5 px-3 text-slate-600">@u.EquipoAsignado</td>
+                            <td class="py-3 px-4 font-mono text-emerald-700 font-medium email-col">
+                                @u.Email
+                            </td>
+                            <td class="py-3 px-4 rol-col">
+                                <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold border @rolBadgeClass">
+                                    @u.Rol
+                                </span>
+                            </td>
+                            <td class="py-3 px-4 text-slate-600">
+                                @u.EquipoAsignado
+                            </td>
+                            <td class="py-3 px-4">
+                                @if (u.Activo)
+                                {
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Activo
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-red-50 text-red-700 border border-red-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Inactivo
+                                    </span>
+                                }
+                            </td>
+                            <td class="py-3 px-4 text-center">
+                                <form method="post" asp-page-handler="ToggleEstado" asp-route-id="@u.Id" class="inline"
+                                      onsubmit="return confirm('¿Confirmas cambiar el estado de acceso para @u.NombreCompleto?');">
+                                    <button type="submit"
+                                            class="px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition @(u.Activo ? "text-slate-600 border-slate-200 hover:bg-red-50 hover:text-red-700 hover:border-red-200" : "text-emerald-700 border-emerald-200 hover:bg-emerald-50")">
+                                        @(u.Activo ? "Desactivar" : "Activar")
+                                    </button>
+                                </form>
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -54,38 +182,49 @@
         </div>
     </div>
 
-    <!-- Bitácora de Auditoría de Accesos (HU-05) -->
-    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-        <h2 class="text-base font-extrabold text-slate-900 mb-4">📜 Bitácora de Auditoría de Inicios de Sesión (HU-05)</h2>
-        <div class="overflow-x-auto">
+    <!-- BITÁCORA DE AUDITORÍA DE INICIOS DE SESIÓN (HU-05) -->
+    <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-lg font-extrabold text-slate-900">
+                    📜 Bitácora de Auditoría de Accesos (HU-05)
+                </h2>
+                <p class="text-xs text-slate-500">
+                    Registro inmutable de intentos de inicio de sesión y acciones administrativas.
+                </p>
+            </div>
+            <span class="text-xs font-mono text-slate-400">Últimos @Model.LogsAuditoria.Count eventos</span>
+        </div>
+
+        <div class="overflow-x-auto rounded-2xl border border-slate-100">
             <table class="w-full text-left border-collapse text-xs">
                 <thead>
-                    <tr class="border-b border-slate-200 text-slate-500 uppercase">
-                        <th class="py-2.5 px-3">Fecha y Hora</th>
-                        <th class="py-2.5 px-3">Correo</th>
-                        <th class="py-2.5 px-3">Rol</th>
-                        <th class="py-2.5 px-3">Equipo</th>
-                        <th class="py-2.5 px-3">Origen</th>
-                        <th class="py-2.5 px-3">Resultado</th>
+                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase font-bold text-[11px]">
+                        <th class="py-3 px-4">Fecha / Hora</th>
+                        <th class="py-3 px-4">Correo</th>
+                        <th class="py-3 px-4">Rol</th>
+                        <th class="py-3 px-4">Origen</th>
+                        <th class="py-3 px-4">Detalle</th>
+                        <th class="py-3 px-4 text-center">Resultado</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody class="divide-y divide-slate-100 font-mono text-[11px]">
                     @foreach (var log in Model.LogsAuditoria)
                     {
-                        <tr class="hover:bg-slate-50">
-                            <td class="py-2.5 px-3 font-mono text-slate-500">@log.FechaHora.ToString("yyyy-MM-dd HH:mm:ss")</td>
-                            <td class="py-2.5 px-3 font-semibold text-slate-800">@log.Email</td>
-                            <td class="py-2.5 px-3">@log.Rol</td>
-                            <td class="py-2.5 px-3 text-slate-600">@log.EquipoAsignado</td>
-                            <td class="py-2.5 px-3 text-slate-500">@log.Origen</td>
-                            <td class="py-2.5 px-3">
+                        <tr class="hover:bg-slate-50/80 transition">
+                            <td class="py-2.5 px-4 text-slate-500 whitespace-nowrap">@log.FechaHora.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                            <td class="py-2.5 px-4 font-semibold text-slate-800">@log.Email</td>
+                            <td class="py-2.5 px-4 text-slate-600">@log.Rol</td>
+                            <td class="py-2.5 px-4 text-slate-500">@log.Origen</td>
+                            <td class="py-2.5 px-4 font-sans text-xs text-slate-600">@log.Detalle</td>
+                            <td class="py-2.5 px-4 text-center">
                                 @if (log.Exitoso)
                                 {
-                                    <span class="px-2 py-0.5 rounded font-bold bg-emerald-100 text-emerald-800">Exitoso</span>
+                                    <span class="px-2 py-0.5 rounded font-bold bg-emerald-100 text-emerald-800 text-[10px]">EXITOSO</span>
                                 }
                                 else
                                 {
-                                    <span class="px-2 py-0.5 rounded font-bold bg-red-100 text-red-700">Fallido</span>
+                                    <span class="px-2 py-0.5 rounded font-bold bg-red-100 text-red-700 text-[10px]">FALLIDO</span>
                                 }
                             </td>
                         </tr>
@@ -95,3 +234,170 @@
         </div>
     </div>
 </div>
+
+<!-- ========================================================================= -->
+<!-- MODAL: REGISTRAR NUEVO USUARIO AL SISTEMA (HU-01, HU-04)                 -->
+<!-- ========================================================================= -->
+<div id="modalNuevoUsuario"
+     class="fixed inset-0 z-50 @(Model.Nuevo ? "flex" : "hidden") items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all duration-200">
+    <div class="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-xl w-full p-6 sm:p-8 space-y-6 relative max-h-[92vh] overflow-y-auto">
+        <!-- Encabezado Modal -->
+        <div class="flex items-start justify-between border-b border-slate-100 pb-4">
+            <div>
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 mb-1">
+                    🛡️ Administración
+                </span>
+                <h3 class="text-xl font-extrabold text-slate-900">
+                    Registrar Nuevo Usuario
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">
+                    El usuario podrá iniciar sesión inmediatamente en la plataforma con estas credenciales.
+                </p>
+            </div>
+            <button type="button" onclick="cerrarModalUsuario()"
+                    class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-lg transition">
+                &times;
+            </button>
+        </div>
+
+        <!-- Formulario -->
+        <form method="post" asp-page-handler="CrearUsuario" class="space-y-4">
+            @Html.AntiForgeryToken()
+
+            <!-- Nombre Completo -->
+            <div>
+                <label asp-for="Input.NombreCompleto" class="block text-xs font-bold text-slate-700 mb-1">
+                    Nombre Completo *
+                </label>
+                <input asp-for="Input.NombreCompleto"
+                       placeholder="Ej. Dra. Valeria Quiroga o Mateo Morales"
+                       class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" />
+                <span asp-validation-for="Input.NombreCompleto" class="text-xs text-red-600 mt-1 block"></span>
+            </div>
+
+            <!-- Correo Electrónico Institucional -->
+            <div>
+                <label asp-for="Input.Email" class="block text-xs font-bold text-slate-700 mb-1">
+                    Correo Electrónico Institucional *
+                </label>
+                <input asp-for="Input.Email" type="email"
+                       placeholder="Ej. valeria.quiroga@innovare.edu.bo"
+                       class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#059669]" />
+                <span asp-validation-for="Input.Email" class="text-xs text-red-600 mt-1 block"></span>
+            </div>
+
+            <!-- Rol y Equipo (2 Columnas) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label asp-for="Input.Rol" class="block text-xs font-bold text-slate-700 mb-1">
+                        Rol en el Sistema *
+                    </label>
+                    <select asp-for="Input.Rol"
+                            class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669] bg-white">
+                        <option value="Estudiante">🎓 Estudiante (Módulo 04)</option>
+                        <option value="Docente">📋 Docente (Módulo 02)</option>
+                        <option value="Nutricionista">🍎 Nutricionista (Módulo 03)</option>
+                        <option value="Admin">🛡️ Administrador (Módulo 01)</option>
+                    </select>
+                    <span asp-validation-for="Input.Rol" class="text-xs text-red-600 mt-1 block"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Input.EquipoAsignado" class="block text-xs font-bold text-slate-700 mb-1">
+                        Equipo o Área *
+                    </label>
+                    <select asp-for="Input.EquipoAsignado"
+                            class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669] bg-white">
+                        <option value="General / Innovare">General / Innovare</option>
+                        <option value="Equipo 1 - Autenticación y Seguridad">Equipo 1 - Autenticación</option>
+                        <option value="Equipo 2 - Perfil y Reportes">Equipo 2 - Perfil y Reportes</option>
+                        <option value="Equipo 3 - Alimentos y Menús">Equipo 3 - Alimentos y Menús</option>
+                        <option value="Equipo 4 - Hábitos Diarios">Equipo 4 - Hábitos Diarios</option>
+                        <option value="Equipo 5 - Recomendaciones">Equipo 5 - Recomendaciones</option>
+                        <option value="Equipo 6 - Notificaciones y QA">Equipo 6 - Notificaciones</option>
+                        <option value="Dirección Escolar">Dirección Escolar</option>
+                    </select>
+                    <span asp-validation-for="Input.EquipoAsignado" class="text-xs text-red-600 mt-1 block"></span>
+                </div>
+            </div>
+
+            <!-- Contraseña y Confirmación -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label asp-for="Input.Password" class="block text-xs font-bold text-slate-700 mb-1">
+                        Contraseña Inicial *
+                    </label>
+                    <input asp-for="Input.Password" type="password"
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" />
+                    <span asp-validation-for="Input.Password" class="text-xs text-red-600 mt-1 block"></span>
+                    <span class="text-[10px] text-slate-400 mt-1 block">Mínimo 6 caracteres. Sugerido: Innovare2026*</span>
+                </div>
+
+                <div>
+                    <label asp-for="Input.ConfirmPassword" class="block text-xs font-bold text-slate-700 mb-1">
+                        Confirmar Contraseña *
+                    </label>
+                    <input asp-for="Input.ConfirmPassword" type="password"
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" />
+                    <span asp-validation-for="Input.ConfirmPassword" class="text-xs text-red-600 mt-1 block"></span>
+                </div>
+            </div>
+
+            <!-- Estado de la cuenta -->
+            <div class="flex items-center gap-3 pt-2">
+                <input asp-for="Input.Activo" type="checkbox" id="chkActivo"
+                       class="w-4 h-4 text-[#059669] rounded border-slate-300 focus:ring-[#059669]" />
+                <label for="chkActivo" class="text-xs font-semibold text-slate-700 select-none cursor-pointer">
+                    Habilitar acceso inmediatamente (Cuenta Activa)
+                </label>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+                <button type="button" onclick="cerrarModalUsuario()"
+                        class="px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer">
+                    Cancelar
+                </button>
+                <button type="submit"
+                        class="px-5 py-2.5 rounded-xl bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold shadow hover:shadow-md transition cursor-pointer">
+                    Guardar y Registrar Usuario
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function abrirModalUsuario() {
+            const modal = document.getElementById('modalNuevoUsuario');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function cerrarModalUsuario() {
+            const modal = document.getElementById('modalNuevoUsuario');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Filtro en vivo de la tabla de usuarios
+        function filtrarUsuarios() {
+            const query = document.getElementById('buscadorUsuarios').value.toLowerCase();
+            const filas = document.querySelectorAll('.fila-usuario');
+
+            filas.forEach(fila => {
+                const nombre = fila.querySelector('.nombre-col')?.innerText.toLowerCase() || '';
+                const email = fila.querySelector('.email-col')?.innerText.toLowerCase() || '';
+                const rol = fila.querySelector('.rol-col')?.innerText.toLowerCase() || '';
+
+                if (nombre.includes(query) || email.includes(query) || rol.includes(query)) {
+                    fila.style.display = '';
+                } else {
+                    fila.style.display = 'none';
+                }
+            });
+        }
+    </script>
+}
