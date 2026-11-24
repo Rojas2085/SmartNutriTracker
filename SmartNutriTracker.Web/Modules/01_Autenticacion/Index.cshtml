@@ -145,9 +145,20 @@
                                 @u.Email
                             </td>
                             <td class="py-3 px-4 rol-col">
-                                <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold border @rolBadgeClass">
-                                    @u.Rol
-                                </span>
+                                <span class="sr-only">@u.Rol</span>
+                                <form method="post" asp-page-handler="CambiarRol" asp-route-id="@u.Id" class="inline-flex items-center gap-1.5">
+                                    <select name="nuevoRol"
+                                            class="px-2 py-1 rounded-lg text-[11px] font-bold border @rolBadgeClass focus:outline-none focus:ring-2 focus:ring-[#059669] cursor-pointer">
+                                        <option value="Estudiante" selected="@(u.Rol == "Estudiante")">Estudiante</option>
+                                        <option value="Docente" selected="@(u.Rol == "Docente")">Docente</option>
+                                        <option value="Nutricionista" selected="@(u.Rol == "Nutricionista")">Nutricionista</option>
+                                        <option value="Admin" selected="@(u.Rol == "Admin")">Admin</option>
+                                    </select>
+                                    <button type="submit" title="Guardar cambio de rol"
+                                            class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-[#059669] hover:text-white text-slate-600 text-[10px] font-bold transition cursor-pointer">
+                                        ✓
+                                    </button>
+                                </form>
                             </td>
                             <td class="py-3 px-4 text-slate-600">
                                 @u.EquipoAsignado
@@ -166,14 +177,23 @@
                                     </span>
                                 }
                             </td>
-                            <td class="py-3 px-4 text-center">
-                                <form method="post" asp-page-handler="ToggleEstado" asp-route-id="@u.Id" class="inline"
-                                      onsubmit="return confirm('¿Confirmas cambiar el estado de acceso para @u.NombreCompleto?');">
-                                    <button type="submit"
-                                            class="px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition @(u.Activo ? "text-slate-600 border-slate-200 hover:bg-red-50 hover:text-red-700 hover:border-red-200" : "text-emerald-700 border-emerald-200 hover:bg-emerald-50")">
-                                        @(u.Activo ? "Desactivar" : "Activar")
-                                    </button>
-                                </form>
+                            <td class="py-3 px-4 text-center whitespace-nowrap">
+                                <div class="inline-flex items-center gap-1.5">
+                                    <form method="post" asp-page-handler="ToggleEstado" asp-route-id="@u.Id" class="inline"
+                                          onsubmit="return confirm('¿Confirmas cambiar el estado de acceso para @u.NombreCompleto?');">
+                                        <button type="submit"
+                                                class="px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition cursor-pointer @(u.Activo ? "text-slate-600 border-slate-200 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-200" : "text-emerald-700 border-emerald-200 hover:bg-emerald-50")">
+                                            @(u.Activo ? "Desactivar" : "Activar")
+                                        </button>
+                                    </form>
+                                    <form method="post" asp-page-handler="EliminarUsuario" asp-route-id="@u.Id" class="inline"
+                                          onsubmit="return confirm('¿Seguro que deseas eliminar la cuenta de @u.NombreCompleto (@u.Email)? Esta acción quedará registrada en la auditoría.');">
+                                        <button type="submit" title="Eliminar usuario"
+                                                class="px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-red-200 text-red-600 hover:bg-red-600 hover:text-white transition cursor-pointer">
+                                            🗑️
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     }

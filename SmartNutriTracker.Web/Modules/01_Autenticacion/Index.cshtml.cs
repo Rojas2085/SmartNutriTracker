@@ -219,6 +219,167 @@ public class IndexModel : PageModel
         return RedirectToPage();
     }
 
+    /// <summary>
+    /// Actualiza el rol asignado a un usuario existente y registra el cambio en la auditoría (HU-04, HU-05).
+    /// </summary>
+    public async Task<IActionResult> OnPostCambiarRolAsync(int id, string nuevoRol)
+    {
+        var usuario = await _context.Usuarios.FindAsync(id);
+        if (usuario == null)
+        {
+            TempData["MensajeError"] = "El usuario seleccionado no existe.";
+            return RedirectToPage();
+        }
+
+        var rolesValidos = new[] { "Admin", "Docente", "Nutricionista", "Estudiante" };
+        var rolNormalizado = rolesValidos.FirstOrDefault(r => r.Equals(nuevoRol?.Trim(), StringComparison.OrdinalIgnoreCase));
+        if (rolNormalizado == null)
+        {
+            TempData["MensajeError"] = $"Rol inválido '{nuevoRol}'.";
+            return RedirectToPage();
+        }
+
+        var currentEmail = User.FindFirstValue(ClaimTypes.Email)?.ToLowerInvariant();
+        if (usuario.Email.ToLowerInvariant() == currentEmail && rolNormalizado != "Admin")
+        {
+            TempData["MensajeError"] = "No puedes quitarte el rol de Admin a tu propia cuenta activa.";
+            return RedirectToPage();
+        }
+
+        if (usuario.Rol == rolNormalizado)
+        {
+            TempData["MensajeExito"] = $"El usuario '{usuario.NombreCompleto}' ya posee el rol '{rolNormalizado}'.";
+            return RedirectToPage();
+        }
+
+        var rolAnterior = usuario.Rol;
+        usuario.Rol = rolNormalizado;
+        await _context.SaveChangesAsync();
+
+        // Si cambió a Estudiante, aseguramos que tenga su perfil base
+        if (rolNormalizado == "Estudiante")
+        {
+            var perfilExiste = await _context.PerfilesEstudiantes.AnyAsync(p => p.UsuarioId == usuario.Id);
+            if (!perfilExiste)
+            {
+                _context.PerfilesEstudiantes.Add(new PerfilEstudiante
+                {
+                    UsuarioId = usuario.Id,
+                    CodigoEstudiante = $"EST-{DateTime.Now.Year}-{usuario.Id:D3}",
+                    GradoSeccion = "Por Asignar",
+                    FechaNacimiento = DateTime.Today.AddYears(-15),
+                    Sexo = "M",
+                    PesoKg = 50.0m,
+                    TallaCm = 160.0m,
+                    Imc = 19.53m,
+                    ClasificacionImc = "Normal",
+                    ObjetivoNutricional = "Mantener",
+                    FechaRegistro = DateTime.UtcNow
+                });
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        var adminEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Administrador";
+        _context.AuditoriasAcceso.Add(new AuditoriaAcceso
+        {
+            Email = usuario.Email,
+            Rol = usuario.Rol,
+            EquipoAsignado = usuario.EquipoAsignado,
+            Exitoso = true,
+            Origen = "Panel Admin Web (HU-04)",
+            Detalle = $"Cambio de rol de '{rolAnterior}' a '{rolNormalizado}' para '{usuario.NombreCompleto}' por Admin '{adminEmail}'.",
+            FechaHora = DateTime.Now
+        });
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation(
+            "[AUDITORÍA CAMBIO ROL] Usuario: {Email} | Anterior: {RolAnterior} -> Nuevo: {RolNuevo} | Por: {Admin}",
+            usuario.Email, rolAnterior, rolNormalizado, adminEmail);
+
+        TempData["MensajeExito"] = $"Rol de '{usuario.NombreCompleto}' actualizado de '{rolAnterior}' a '{rolNormalizado}'.";
+        return RedirectToPage();
+    }
+
+    /// <summary>
+    /// Elimina un usuario del sistema y registra la eliminación en la auditoría (HU-01, HU-05).
+    /// </summary>
+    public async Task<IActionResult> OnPostEliminarUsuarioAsync(int id)
+    {
+        var usuario = await _context.Usuarios.FindAsync(id);
+        if (usuario == null)
+        {
+            TempData["MensajeError"] = "El usuario seleccionado no existe.";
+            return RedirectToPage();
+        }
+
+        var currentEmail = User.FindFirstValue(ClaimTypes.Email)?.ToLowerInvariant();
+        if (usuario.Email.ToLowerInvariant() == currentEmail)
+        {
+            TempData["MensajeError"] = "No puedes eliminar tu propia cuenta de administrador activa.";
+            return RedirectToPage();
+        }
+
+        var adminEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Administrador";
+        var emailEliminado = usuario.Email;
+        var nombreEliminado = usuario.NombreCompleto;
+        var rolEliminado = usuario.Rol;
+        var equipoEliminado = usuario.EquipoAsignado;
+
+        try
+        {
+            // Eliminar perfiles asociados si existen para evitar violaciones de clave foránea
+            var perfiles = await _context.PerfilesEstudiantes.Where(p => p.UsuarioId == usuario.Id).ToListAsync();
+            if (perfiles.Count > 0)
+            {
+                _context.PerfilesEstudiantes.RemoveRange(perfiles);
+            }
+
+            _context.Usuarios.Remove(usuario);
+            await _context.SaveChangesAsync();
+
+            _context.AuditoriasAcceso.Add(new AuditoriaAcceso
+            {
+                Email = emailEliminado,
+                Rol = rolEliminado,
+                EquipoAsignado = equipoEliminado,
+                Exitoso = true,
+                Origen = "Panel Admin Web (Eliminación)",
+                Detalle = $"Usuario '{nombreEliminado}' ({emailEliminado}) eliminado por Admin '{adminEmail}'.",
+                FechaHora = DateTime.Now
+            });
+            await _context.SaveChangesAsync();
+
+            _logger.LogWarning(
+                "[AUDITORÍA ELIMINACIÓN] Usuario eliminado: {Email} ({Rol}) por Admin {Admin}",
+                emailEliminado, rolEliminado, adminEmail);
+
+            TempData["MensajeExito"] = $"Usuario '{nombreEliminado}' ({emailEliminado}) eliminado del sistema.";
+        }
+        catch (DbUpdateException)
+        {
+            // Si tiene registros históricos en otros módulos (menús, hábitos, etc.), se desactiva en lugar de romper integridad
+            usuario.Activo = false;
+            await _context.SaveChangesAsync();
+
+            _context.AuditoriasAcceso.Add(new AuditoriaAcceso
+            {
+                Email = emailEliminado,
+                Rol = rolEliminado,
+                EquipoAsignado = equipoEliminado,
+                Exitoso = true,
+                Origen = "Panel Admin Web (Baja Lógica)",
+                Detalle = $"Usuario '{nombreEliminado}' desactivado (posee registros históricos asociados) por Admin '{adminEmail}'.",
+                FechaHora = DateTime.Now
+            });
+            await _context.SaveChangesAsync();
+
+            TempData["MensajeExito"] = $"'{nombreEliminado}' tiene registros históricos en otros módulos, por lo que fue desactivado para proteger la integridad de datos.";
+        }
+
+        return RedirectToPage();
+    }
+
     private async Task CargarDatosAsync()
     {
         Usuarios = await _context.Usuarios

@@ -249,4 +249,128 @@ public class AuthApiController : ControllerBase
             }
         });
     }
+
+    /// <summary>
+    /// Lista los usuarios registrados en el sistema (HU-01, HU-04). Requiere token JWT de Administrador.
+    /// </summary>
+    [HttpGet("usuarios")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+    public async Task<IActionResult> ListarUsuarios()
+    {
+        var usuarios = await _context.Usuarios
+            .OrderByDescending(u => u.Id)
+            .Select(u => new
+            {
+                u.Id,
+                u.NombreCompleto,
+                u.Email,
+                u.Rol,
+                u.EquipoAsignado,
+                u.Activo,
+                u.FechaCreacion
+            })
+            .ToListAsync();
+
+        return Ok(usuarios);
+    }
+
+    public record CambiarRolRequestDto(string NuevoRol);
+
+    /// <summary>
+    /// Cambia el rol de un usuario existente y registra el evento en auditoría (HU-04, HU-05).
+    /// </summary>
+    [HttpPut("usuarios/{id:int}/rol")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+    public async Task<IActionResult> CambiarRolUsuario(int id, [FromBody] CambiarRolRequestDto request)
+    {
+        var usuario = await _context.Usuarios.FindAsync(id);
+        if (usuario == null)
+            return NotFound(new { exito = false, mensaje = "Usuario no encontrado." });
+
+        var rolesPermitidos = new[] { "Admin", "Docente", "Nutricionista", "Estudiante" };
+        var rolValido = rolesPermitidos.FirstOrDefault(r => r.Equals(request.NuevoRol?.Trim(), StringComparison.OrdinalIgnoreCase));
+        if (rolValido == null)
+            return BadRequest(new { exito = false, mensaje = $"Rol inválido. Roles permitidos: {string.Join(", ", rolesPermitidos)}" });
+
+        var rolAnterior = usuario.Rol;
+        usuario.Rol = rolValido;
+        await _context.SaveChangesAsync();
+
+        var adminEmail = User.FindFirstValue(ClaimTypes.Email) ?? "admin@innovare.edu.bo";
+        _context.AuditoriasAcceso.Add(new AuditoriaAcceso
+        {
+            Email = usuario.Email,
+            Rol = usuario.Rol,
+            EquipoAsignado = usuario.EquipoAsignado,
+            Exitoso = true,
+            Origen = "API REST Admin (PUT /api/auth/usuarios/rol)",
+            Detalle = $"Cambio de rol de '{rolAnterior}' a '{rolValido}' por Admin '{adminEmail}'",
+            FechaHora = DateTime.Now
+        });
+        await _context.SaveChangesAsync();
+
+        return Ok(new { exito = true, mensaje = $"Rol actualizado de '{rolAnterior}' a '{rolValido}'.", usuarioId = usuario.Id, rol = usuario.Rol });
+    }
+
+    /// <summary>
+    /// Elimina (o desactiva si posee historial) un usuario y registra auditoría (HU-01, HU-05).
+    /// </summary>
+    [HttpDelete("usuarios/{id:int}")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+    public async Task<IActionResult> EliminarUsuario(int id)
+    {
+        var usuario = await _context.Usuarios.FindAsync(id);
+        if (usuario == null)
+            return NotFound(new { exito = false, mensaje = "Usuario no encontrado." });
+
+        var adminEmail = User.FindFirstValue(ClaimTypes.Email) ?? "admin@innovare.edu.bo";
+        if (usuario.Email.Equals(adminEmail, StringComparison.OrdinalIgnoreCase))
+            return BadRequest(new { exito = false, mensaje = "No puedes eliminar tu propia cuenta de administrador." });
+
+        var emailEliminado = usuario.Email;
+        var rolEliminado = usuario.Rol;
+        var equipoEliminado = usuario.EquipoAsignado;
+
+        try
+        {
+            var perfiles = await _context.PerfilesEstudiantes.Where(p => p.UsuarioId == usuario.Id).ToListAsync();
+            if (perfiles.Count > 0) _context.PerfilesEstudiantes.RemoveRange(perfiles);
+
+            _context.Usuarios.Remove(usuario);
+            await _context.SaveChangesAsync();
+
+            _context.AuditoriasAcceso.Add(new AuditoriaAcceso
+            {
+                Email = emailEliminado,
+                Rol = rolEliminado,
+                EquipoAsignado = equipoEliminado,
+                Exitoso = true,
+                Origen = "API REST Admin (DELETE /api/auth/usuarios)",
+                Detalle = $"Usuario '{emailEliminado}' eliminado por Admin '{adminEmail}'",
+                FechaHora = DateTime.Now
+            });
+            await _context.SaveChangesAsync();
+
+            return Ok(new { exito = true, mensaje = $"Usuario '{emailEliminado}' eliminado correctamente." });
+        }
+        catch (DbUpdateException)
+        {
+            usuario.Activo = false;
+            await _context.SaveChangesAsync();
+
+            _context.AuditoriasAcceso.Add(new AuditoriaAcceso
+            {
+                Email = emailEliminado,
+                Rol = rolEliminado,
+                EquipoAsignado = equipoEliminado,
+                Exitoso = true,
+                Origen = "API REST Admin (Baja Lógica)",
+                Detalle = $"Usuario '{emailEliminado}' desactivado (tiene registros históricos) por Admin '{adminEmail}'",
+                FechaHora = DateTime.Now
+            });
+            await _context.SaveChangesAsync();
+
+            return Ok(new { exito = true, mensaje = $"Usuario '{emailEliminado}' desactivado para preservar integridad histórica." });
+        }
+    }
 }

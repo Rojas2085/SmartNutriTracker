@@ -1,0 +1,40 @@
+name: SmartNutriTracker CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - 'equipo-*'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-verify:
+    name: Build & Verify (.NET 8)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restaurar dependencias NuGet
+        run: dotnet restore SmartNutriTracker.sln
+
+      - name: Compilar solución (Release)
+        run: dotnet build SmartNutriTracker.sln --configuration Release --no-restore
+
+      - name: Publicar artefacto de despliegue
+        run: dotnet publish SmartNutriTracker.Web/SmartNutriTracker.Web.csproj --configuration Release --no-build --output ./publish
+
+      - name: Subir artefacto compilado
+        uses: actions/upload-artifact@v4
+        with:
+          name: smartnutritracker-web-release
+          path: ./publish
+          retention-days: 7

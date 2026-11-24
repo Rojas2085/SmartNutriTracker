@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SmartNutriTracker.Web.Core.Data;
@@ -8,8 +11,10 @@ namespace SmartNutriTracker.Web.Modules.Alimentos.Controllers;
 [ApiController]
 [Route("api/alimentos")]
 [Produces("application/json")]
+[Authorize(AuthenticationSchemes = AuthSchemes)]
 public class AlimentosApiController : ControllerBase
 {
+    private const string AuthSchemes = $"{CookieAuthenticationDefaults.AuthenticationScheme},{JwtBearerDefaults.AuthenticationScheme}";
     private readonly AppDbContext _context;
     private readonly ILogger<AlimentosApiController> _logger;
 
@@ -70,6 +75,7 @@ public class AlimentosApiController : ControllerBase
     /// Registra un nuevo alimento en el catálogo con semáforo calculado automáticamente (HU-14).
     /// </summary>
     [HttpPost]
+    [Authorize(AuthenticationSchemes = AuthSchemes, Roles = "Nutricionista,Admin")]
     public async Task<IActionResult> RegistrarAlimento([FromBody] Alimento model)
     {
         if (!ModelState.IsValid)
@@ -101,6 +107,7 @@ public class AlimentosApiController : ControllerBase
     /// Actualiza un alimento existente (HU-15).
     /// </summary>
     [HttpPut("{id}")]
+    [Authorize(AuthenticationSchemes = AuthSchemes, Roles = "Nutricionista,Admin")]
     public async Task<IActionResult> ActualizarAlimento(int id, [FromBody] Alimento model)
     {
         var existing = await _context.Alimentos.FindAsync(id);
@@ -128,6 +135,7 @@ public class AlimentosApiController : ControllerBase
     /// Alterna el estado de favorito de un alimento (★ Favoritos).
     /// </summary>
     [HttpPost("{id}/favorito")]
+    [Authorize(AuthenticationSchemes = AuthSchemes, Roles = "Nutricionista,Admin")]
     public async Task<IActionResult> ToggleFavorito(int id)
     {
         var alimento = await _context.Alimentos.FindAsync(id);
@@ -144,6 +152,7 @@ public class AlimentosApiController : ControllerBase
     /// Elimina lógicamente un alimento (HU-15).
     /// </summary>
     [HttpDelete("{id}")]
+    [Authorize(AuthenticationSchemes = AuthSchemes, Roles = "Nutricionista,Admin")]
     public async Task<IActionResult> EliminarAlimento(int id)
     {
         var alimento = await _context.Alimentos.FindAsync(id);
@@ -187,6 +196,7 @@ public class AlimentosApiController : ControllerBase
     }
 
     [HttpPost("menus")]
+    [Authorize(AuthenticationSchemes = AuthSchemes, Roles = "Nutricionista,Admin")]
     public async Task<IActionResult> GuardarMenu([FromBody] GuardarMenuDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.NombreMenu))
@@ -243,6 +253,7 @@ public class AlimentosApiController : ControllerBase
     }
 
     [HttpPut("menus/{id}")]
+    [Authorize(AuthenticationSchemes = AuthSchemes, Roles = "Nutricionista,Admin")]
     public async Task<IActionResult> ActualizarMenu(int id, [FromBody] GuardarMenuDto dto)
     {
         var menu = await _context.MenusDiarios
@@ -298,6 +309,7 @@ public class AlimentosApiController : ControllerBase
     }
 
     [HttpPost("menus/{id}/clonar")]
+    [Authorize(AuthenticationSchemes = AuthSchemes, Roles = "Nutricionista,Admin")]
     public async Task<IActionResult> ClonarMenu(int id)
     {
         var original = await _context.MenusDiarios
@@ -346,6 +358,7 @@ public class AlimentosApiController : ControllerBase
     }
 
     [HttpDelete("menus/{id}")]
+    [Authorize(AuthenticationSchemes = AuthSchemes, Roles = "Nutricionista,Admin")]
     public async Task<IActionResult> EliminarMenu(int id)
     {
         var menu = await _context.MenusDiarios
