@@ -103,7 +103,7 @@ public class IndexModel : PageModel
 
         public string? NuevaPassword { get; set; }
 
-        public bool Activo { get; set; } = true;
+        public bool Activo { get; set; }
     }
 
     public async Task OnGetAsync()
