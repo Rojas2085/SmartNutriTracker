@@ -81,6 +81,31 @@ public class IndexModel : PageModel
         public bool Activo { get; set; } = true;
     }
 
+    public class EditarUsuarioForm
+    {
+        public int Id { get; set; }
+
+        [Required(ErrorMessage = "El nombre completo es obligatorio.")]
+        [StringLength(120, ErrorMessage = "El nombre no puede exceder 120 caracteres.")]
+        public string NombreCompleto { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "El correo electrónico es obligatorio.")]
+        [EmailAddress(ErrorMessage = "El formato del correo electrónico no es válido.")]
+        [StringLength(150)]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "El rol es obligatorio.")]
+        public string Rol { get; set; } = "Estudiante";
+
+        [Required(ErrorMessage = "El equipo o área asignada es obligatoria.")]
+        [StringLength(100)]
+        public string EquipoAsignado { get; set; } = "General / Innovare";
+
+        public string? NuevaPassword { get; set; }
+
+        public bool Activo { get; set; } = true;
+    }
+
     public async Task OnGetAsync()
     {
         MensajeExito = TempData["MensajeExito"] as string;
@@ -298,6 +323,135 @@ public class IndexModel : PageModel
             usuario.Email, rolAnterior, rolNormalizado, adminEmail);
 
         TempData["MensajeExito"] = $"Rol de '{usuario.NombreCompleto}' actualizado de '{rolAnterior}' a '{rolNormalizado}'.";
+        return RedirectToPage();
+    }
+
+    /// <summary>
+    /// Edita los datos completos de cualquier usuario existente (Estudiante, Docente, Nutricionista o Admin)
+    /// y registra la modificación en la auditoría (HU-01, HU-04, HU-05).
+    /// </summary>
+    public async Task<IActionResult> OnPostEditarUsuarioAsync(EditarUsuarioForm editInput)
+    {
+        var usuario = await _context.Usuarios.FindAsync(editInput.Id);
+        if (usuario == null)
+        {
+            TempData["MensajeError"] = "El usuario que intentas editar no existe.";
+            return RedirectToPage();
+        }
+
+        if (string.IsNullOrWhiteSpace(editInput.NombreCompleto) || string.IsNullOrWhiteSpace(editInput.Email))
+        {
+            TempData["MensajeError"] = "El nombre completo y el correo electrónico son obligatorios.";
+            return RedirectToPage();
+        }
+
+        var emailAttr = new EmailAddressAttribute();
+        var emailNormalizado = editInput.Email.Trim().ToLowerInvariant();
+        if (!emailAttr.IsValid(emailNormalizado))
+        {
+            TempData["MensajeError"] = $"El correo '{editInput.Email}' no tiene un formato válido.";
+            return RedirectToPage();
+        }
+
+        // Validar que el correo no esté usado por otro usuario
+        var correoDuplicado = await _context.Usuarios
+            .AnyAsync(u => u.Id != usuario.Id && u.Email.ToLower() == emailNormalizado);
+        if (correoDuplicado)
+        {
+            TempData["MensajeError"] = $"El correo '{emailNormalizado}' ya está registrado por otro usuario.";
+            return RedirectToPage();
+        }
+
+        // Validar rol permitido
+        var rolesValidos = new[] { "Admin", "Docente", "Nutricionista", "Estudiante" };
+        var rolNormalizado = rolesValidos.FirstOrDefault(r => r.Equals(editInput.Rol?.Trim(), StringComparison.OrdinalIgnoreCase));
+        if (rolNormalizado == null)
+        {
+            TempData["MensajeError"] = $"Rol inválido '{editInput.Rol}'.";
+            return RedirectToPage();
+        }
+
+        // Proteger la cuenta del administrador activo
+        var currentEmail = User.FindFirstValue(ClaimTypes.Email)?.ToLowerInvariant();
+        var esMismoAdmin = usuario.Email.ToLowerInvariant() == currentEmail;
+        if (esMismoAdmin && rolNormalizado != "Admin")
+        {
+            TempData["MensajeError"] = "No puedes cambiar el rol de tu propia cuenta de administrador activa.";
+            return RedirectToPage();
+        }
+        if (esMismoAdmin && !editInput.Activo)
+        {
+            TempData["MensajeError"] = "No puedes desactivar tu propia cuenta de administrador activa.";
+            return RedirectToPage();
+        }
+
+        // Validar nueva contraseña si se ingresó
+        var cambioPassword = false;
+        if (!string.IsNullOrWhiteSpace(editInput.NuevaPassword))
+        {
+            if (editInput.NuevaPassword.Length < 6)
+            {
+                TempData["MensajeError"] = "La nueva contraseña debe tener al menos 6 caracteres.";
+                return RedirectToPage();
+            }
+            usuario.PasswordHash = DbInitializer.HashPassword(editInput.NuevaPassword);
+            cambioPassword = true;
+        }
+
+        var rolAnterior = usuario.Rol;
+        usuario.NombreCompleto = editInput.NombreCompleto.Trim();
+        usuario.Email = emailNormalizado;
+        usuario.Rol = rolNormalizado;
+        usuario.EquipoAsignado = string.IsNullOrWhiteSpace(editInput.EquipoAsignado)
+            ? "General / Innovare"
+            : editInput.EquipoAsignado.Trim();
+        usuario.Activo = editInput.Activo;
+
+        await _context.SaveChangesAsync();
+
+        // Si el usuario es o pasó a ser Estudiante, garantizar su ficha base en PerfilesEstudiantes
+        if (rolNormalizado == "Estudiante")
+        {
+            var perfilExiste = await _context.PerfilesEstudiantes.AnyAsync(p => p.UsuarioId == usuario.Id);
+            if (!perfilExiste)
+            {
+                _context.PerfilesEstudiantes.Add(new PerfilEstudiante
+                {
+                    UsuarioId = usuario.Id,
+                    CodigoEstudiante = $"EST-{DateTime.Now.Year}-{usuario.Id:D3}",
+                    GradoSeccion = "Por Asignar",
+                    FechaNacimiento = DateTime.Today.AddYears(-15),
+                    Sexo = "M",
+                    PesoKg = 50.0m,
+                    TallaCm = 160.0m,
+                    Imc = 19.53m,
+                    ClasificacionImc = "Normal",
+                    ObjetivoNutricional = "Mantener",
+                    FechaRegistro = DateTime.UtcNow
+                });
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        var adminEmail = User.FindFirstValue(ClaimTypes.Email) ?? "Administrador";
+        var detallePass = cambioPassword ? " (incluye cambio de contraseña)" : "";
+        _context.AuditoriasAcceso.Add(new AuditoriaAcceso
+        {
+            Email = usuario.Email,
+            Rol = usuario.Rol,
+            EquipoAsignado = usuario.EquipoAsignado,
+            Exitoso = true,
+            Origen = "Panel Admin Web (Edición Usuario)",
+            Detalle = $"Usuario '{usuario.NombreCompleto}' editado (Rol: '{rolAnterior}' -> '{usuario.Rol}', Estado: {(usuario.Activo ? "Activo" : "Inactivo")}){detallePass} por Admin '{adminEmail}'.",
+            FechaHora = DateTime.Now
+        });
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation(
+            "[AUDITORÍA EDICIÓN USUARIO] Id: {Id} | Email: {Email} | Rol: {Rol} | Por: {Admin}",
+            usuario.Id, usuario.Email, usuario.Rol, adminEmail);
+
+        TempData["MensajeExito"] = $"¡Usuario '{usuario.NombreCompleto}' actualizado correctamente!";
         return RedirectToPage();
     }
 

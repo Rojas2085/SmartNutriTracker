@@ -275,6 +275,72 @@ public class AuthApiController : ControllerBase
     }
 
     public record CambiarRolRequestDto(string NuevoRol);
+    public record EditarUsuarioRequestDto(string NombreCompleto, string Email, string Rol, string EquipoAsignado, bool Activo, string? NuevaPassword = null);
+
+    /// <summary>
+    /// Edita los datos completos de un usuario existente (HU-01, HU-04, HU-05). Requiere token JWT de Administrador.
+    /// </summary>
+    [HttpPut("usuarios/{id:int}")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+    public async Task<IActionResult> EditarUsuario(int id, [FromBody] EditarUsuarioRequestDto request)
+    {
+        var usuario = await _context.Usuarios.FindAsync(id);
+        if (usuario == null)
+            return NotFound(new { exito = false, mensaje = "Usuario no encontrado." });
+
+        if (string.IsNullOrWhiteSpace(request.NombreCompleto) || string.IsNullOrWhiteSpace(request.Email))
+            return BadRequest(new { exito = false, mensaje = "NombreCompleto y Email son obligatorios." });
+
+        var emailNormalizado = request.Email.Trim().ToLowerInvariant();
+        if (await _context.Usuarios.AnyAsync(u => u.Id != id && u.Email.ToLower() == emailNormalizado))
+            return BadRequest(new { exito = false, mensaje = $"El correo '{emailNormalizado}' ya está registrado." });
+
+        var rolesPermitidos = new[] { "Admin", "Docente", "Nutricionista", "Estudiante" };
+        var rolValido = rolesPermitidos.FirstOrDefault(r => r.Equals(request.Rol?.Trim(), StringComparison.OrdinalIgnoreCase));
+        if (rolValido == null)
+            return BadRequest(new { exito = false, mensaje = $"Rol inválido. Roles permitidos: {string.Join(", ", rolesPermitidos)}" });
+
+        if (!string.IsNullOrWhiteSpace(request.NuevaPassword))
+        {
+            if (request.NuevaPassword.Length < 6)
+                return BadRequest(new { exito = false, mensaje = "La nueva contraseña debe tener al menos 6 caracteres." });
+            usuario.PasswordHash = DbInitializer.HashPassword(request.NuevaPassword);
+        }
+
+        usuario.NombreCompleto = request.NombreCompleto.Trim();
+        usuario.Email = emailNormalizado;
+        usuario.Rol = rolValido;
+        usuario.EquipoAsignado = string.IsNullOrWhiteSpace(request.EquipoAsignado) ? "General / Innovare" : request.EquipoAsignado.Trim();
+        usuario.Activo = request.Activo;
+        await _context.SaveChangesAsync();
+
+        var adminEmail = User.FindFirstValue(ClaimTypes.Email) ?? "admin@innovare.edu.bo";
+        _context.AuditoriasAcceso.Add(new AuditoriaAcceso
+        {
+            Email = usuario.Email,
+            Rol = usuario.Rol,
+            EquipoAsignado = usuario.EquipoAsignado,
+            Exitoso = true,
+            Origen = "API REST Admin (PUT /api/auth/usuarios)",
+            Detalle = $"Usuario '{usuario.NombreCompleto}' editado por Admin '{adminEmail}'",
+            FechaHora = DateTime.Now
+        });
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            exito = true,
+            mensaje = $"Usuario '{usuario.NombreCompleto}' actualizado correctamente.",
+            usuario = new UsuarioInfoDto
+            {
+                Id = usuario.Id,
+                NombreCompleto = usuario.NombreCompleto,
+                Email = usuario.Email,
+                Rol = usuario.Rol,
+                EquipoAsignado = usuario.EquipoAsignado
+            }
+        });
+    }
 
     /// <summary>
     /// Cambia el rol de un usuario existente y registra el evento en auditoría (HU-04, HU-05).

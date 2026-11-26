@@ -179,6 +179,18 @@
                             </td>
                             <td class="py-3 px-4 text-center whitespace-nowrap">
                                 <div class="inline-flex items-center gap-1.5">
+                                    <button type="button"
+                                            onclick="abrirModalEditar(this)"
+                                            data-id="@u.Id"
+                                            data-nombre="@u.NombreCompleto"
+                                            data-email="@u.Email"
+                                            data-rol="@u.Rol"
+                                            data-equipo="@u.EquipoAsignado"
+                                            data-activo="@u.Activo.ToString().ToLower()"
+                                            title="Editar usuario"
+                                            class="px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-blue-200 text-blue-700 bg-blue-50/50 hover:bg-blue-600 hover:text-white transition cursor-pointer">
+                                        ✏️ Editar
+                                    </button>
                                     <form method="post" asp-page-handler="ToggleEstado" asp-route-id="@u.Id" class="inline"
                                           onsubmit="return confirm('¿Confirmas cambiar el estado de acceso para @u.NombreCompleto?');">
                                         <button type="submit"
@@ -387,6 +399,122 @@
     </div>
 </div>
 
+<!-- ========================================================================= -->
+<!-- MODAL: EDITAR USUARIO EXISTENTE (CUALQUIER ROL)                          -->
+<!-- ========================================================================= -->
+<div id="modalEditarUsuario"
+     class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all duration-200">
+    <div class="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-xl w-full p-6 sm:p-8 space-y-6 relative max-h-[92vh] overflow-y-auto">
+        <!-- Encabezado Modal -->
+        <div class="flex items-start justify-between border-b border-slate-100 pb-4">
+            <div>
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800 mb-1">
+                    ✏️ Edición de Usuario
+                </span>
+                <h3 class="text-xl font-extrabold text-slate-900">
+                    Editar Datos del Usuario
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">
+                    Actualiza nombre, correo, rol, área asignada, estado o restablece la contraseña.
+                </p>
+            </div>
+            <button type="button" onclick="cerrarModalEditar()"
+                    class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-lg transition cursor-pointer">
+                &times;
+            </button>
+        </div>
+
+        <!-- Formulario Edición -->
+        <form method="post" asp-page-handler="EditarUsuario" class="space-y-4">
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="edit_Id" name="Id" />
+
+            <!-- Nombre Completo -->
+            <div>
+                <label for="edit_NombreCompleto" class="block text-xs font-bold text-slate-700 mb-1">
+                    Nombre Completo *
+                </label>
+                <input id="edit_NombreCompleto" name="NombreCompleto" type="text" required maxlength="120"
+                       class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" />
+            </div>
+
+            <!-- Correo Institucional -->
+            <div>
+                <label for="edit_Email" class="block text-xs font-bold text-slate-700 mb-1">
+                    Correo Electrónico Institucional *
+                </label>
+                <input id="edit_Email" name="Email" type="email" required maxlength="150"
+                       class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#059669]" />
+            </div>
+
+            <!-- Rol y Equipo -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="edit_Rol" class="block text-xs font-bold text-slate-700 mb-1">
+                        Rol en el Sistema *
+                    </label>
+                    <select id="edit_Rol" name="Rol" required
+                            class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669] bg-white">
+                        <option value="Estudiante">🎓 Estudiante (Módulo 04)</option>
+                        <option value="Docente">📋 Docente (Módulo 02)</option>
+                        <option value="Nutricionista">🍎 Nutricionista (Módulo 03)</option>
+                        <option value="Admin">🛡️ Administrador (Módulo 01)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="edit_EquipoAsignado" class="block text-xs font-bold text-slate-700 mb-1">
+                        Equipo o Área *
+                    </label>
+                    <input id="edit_EquipoAsignado" name="EquipoAsignado" type="text" list="equiposLista" required maxlength="100"
+                           class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669] bg-white" />
+                    <datalist id="equiposLista">
+                        <option value="General / Innovare"></option>
+                        <option value="Equipo 1 - Autenticación y Seguridad"></option>
+                        <option value="Equipo 2 - Perfil y Reportes"></option>
+                        <option value="Equipo 3 - Alimentos y Menús"></option>
+                        <option value="Equipo 4 - Hábitos Diarios"></option>
+                        <option value="Equipo 5 - Recomendaciones"></option>
+                        <option value="Equipo 6 - Notificaciones y QA"></option>
+                        <option value="Dirección Escolar"></option>
+                    </datalist>
+                </div>
+            </div>
+
+            <!-- Nueva Contraseña (Opcional) -->
+            <div>
+                <label for="edit_NuevaPassword" class="block text-xs font-bold text-slate-700 mb-1">
+                    Nueva Contraseña <span class="font-normal text-slate-400">(opcional — déjalo vacío para mantener la actual)</span>
+                </label>
+                <input id="edit_NuevaPassword" name="NuevaPassword" type="password" minlength="6"
+                       placeholder="Dejar en blanco para no cambiar..."
+                       class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#059669]" />
+            </div>
+
+            <!-- Estado -->
+            <div class="flex items-center gap-3 pt-2">
+                <input id="edit_Activo" name="Activo" type="checkbox" value="true"
+                       class="w-4 h-4 text-[#059669] rounded border-slate-300 focus:ring-[#059669]" />
+                <label for="edit_Activo" class="text-xs font-semibold text-slate-700 select-none cursor-pointer">
+                    Cuenta Activa (permitir inicio de sesión)
+                </label>
+            </div>
+
+            <!-- Botones -->
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+                <button type="button" onclick="cerrarModalEditar()"
+                        class="px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer">
+                    Cancelar
+                </button>
+                <button type="submit"
+                        class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow hover:shadow-md transition cursor-pointer">
+                    Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @section Scripts {
     <partial name="/Pages/Shared/_ValidationScriptsPartial.cshtml" />
     <script>
@@ -398,6 +526,26 @@
 
         function cerrarModalUsuario() {
             const modal = document.getElementById('modalNuevoUsuario');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function abrirModalEditar(btn) {
+            document.getElementById('edit_Id').value = btn.dataset.id || '';
+            document.getElementById('edit_NombreCompleto').value = btn.dataset.nombre || '';
+            document.getElementById('edit_Email').value = btn.dataset.email || '';
+            document.getElementById('edit_Rol').value = btn.dataset.rol || 'Estudiante';
+            document.getElementById('edit_EquipoAsignado').value = btn.dataset.equipo || 'General / Innovare';
+            document.getElementById('edit_NuevaPassword').value = '';
+            document.getElementById('edit_Activo').checked = (btn.dataset.activo === 'true');
+
+            const modal = document.getElementById('modalEditarUsuario');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function cerrarModalEditar() {
+            const modal = document.getElementById('modalEditarUsuario');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
         }
